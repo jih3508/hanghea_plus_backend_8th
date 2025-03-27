@@ -77,7 +77,7 @@ public class PointServiceImpl implements PointService {
 
             UserPoint userPoint = userPointTable.selectById(id);
             // 유저 포인트 사용 가능한지 확인
-            validation.userPointIsUsed(userPoint, amount);
+            validation.isChargePoint(userPoint, amount);
 
             // 포인트 중전
             userPoint = userPointTable.insertOrUpdate(id,userPoint.point() + amount);
