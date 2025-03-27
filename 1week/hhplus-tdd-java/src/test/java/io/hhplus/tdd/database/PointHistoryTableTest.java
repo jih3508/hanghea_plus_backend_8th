@@ -4,13 +4,10 @@ import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
@@ -19,10 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class PointHistoryTableTest {
 
-    @Mock
+    @InjectMocks
     private PointHistoryTable pointHistoryTable;
 
-    @Mock
+    @InjectMocks
     private UserPointTable userPointTable;
 
     @BeforeEach
@@ -34,7 +31,6 @@ class PointHistoryTableTest {
 
 
     @Test
-    @DisplayName("포인트 ")
     void 포인트_내역_충전_이력_등록_테스트(){
         // given
         UserPoint userPoint = userPointTable.selectById(1L);
