@@ -10,12 +10,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,6 +27,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PointServiceTest {
+
+    private static final Logger log = LoggerFactory.getLogger(PointServiceTest.class);
 
     @InjectMocks
     private PointServiceImpl pointService;
@@ -203,6 +208,241 @@ class PointServiceTest {
         verify(pointHistoryTable, times(1)).selectAllByUserId(1l);
     }
 
+    @Test
+    @DisplayName("충전시 같은 사용자가 30초 이내 이용 했을때 오류 나는지 확인")
+    void 충전시_30초내_유저_동시_접속자_테스트(){
+        Long userId = 1L;
+        long amount = 5000l;
+        UserPoint userPoint = new UserPoint(userId, 10000l, System.currentTimeMillis());
 
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(userPoint);
+
+        // 첫 번째 요청 성공
+        pointService.charge(userId, amount);
+
+        // 두 번째 요청 (30초 내)
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            pointService.charge(userId, amount);
+        });
+
+
+        // then
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(exception.getReason()).isEqualTo( "사용자 포인트 이용 중입니다.");
+
+    }
+
+
+    @Test
+    @DisplayName("충전시 같은 사용자가 30초 이후에는 이용 했을때 정상으로 되는지 확인")
+    void 충전시_30초이후_유저_동시_접속자_테스트() throws InterruptedException {
+        Long userId = 1L;
+        long amount = 5000l;
+        UserPoint userPoint = new UserPoint(userId, 10000l, System.currentTimeMillis());
+
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(userPoint);
+
+        // 첫 번째 요청 성공
+        pointService.charge(userId, amount);
+
+        TimeUnit.SECONDS.sleep(31);
+
+        // 두 번째 요청 (30초 이후)
+        userPoint = new UserPoint(userId, 10000l+amount, System.currentTimeMillis());
+        UserPoint result = new UserPoint(userId, 10000l+amount * 2, System.currentTimeMillis());
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(userPoint);
+        when(userPointTable.insertOrUpdate(userId, 10000l+amount * 2)).thenReturn(result);
+        UserPoint resultPoint = pointService.charge(userId, amount);
+
+        assertThat(resultPoint).isNotNull();
+        assertThat(resultPoint.point()).isEqualTo(10000l+amount * 2);
+
+    }
+
+    @Test
+    @DisplayName("사용시 같은 사용자가 30초 이내 이용 했을때 오류 나는지 확인")
+    void 사용시_유저_동시_접속자_테스트(){
+        Long userId = 1L;
+        long amount = 5000l;
+        UserPoint userPoint = new UserPoint(userId, 10000l, System.currentTimeMillis());
+
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(userPoint);
+
+        // 첫 번째 요청 성공
+        pointService.charge(userId, amount);
+
+        // 두 번째 요청 (30초 내)
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            pointService.use(userId, amount);
+        });
+
+
+        // then
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(exception.getReason()).isEqualTo( "사용자 포인트 이용 중입니다.");
+
+
+    }
+
+
+    @Test
+    @DisplayName("사용시 같은 사용자가 30초 이후에는 이용 했을때 정상으로 되는지 확인")
+    void 사용시_30초이후_유저_동시_접속자_테스트() throws InterruptedException {
+        Long userId = 1L;
+        long amount = 5000l;
+        UserPoint userPoint = new UserPoint(userId, 12000l, System.currentTimeMillis());
+
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(userPoint);
+
+        // 첫 번째 요청 성공
+        pointService.use(userId, amount);
+
+        TimeUnit.SECONDS.sleep(31);
+
+        // 두 번째 요청 (30초 이후)
+        userPoint = new UserPoint(userId, 12000l-amount, System.currentTimeMillis());
+        UserPoint result = new UserPoint(userId, 12000l-amount * 2, System.currentTimeMillis());
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(userPoint);
+        when(userPointTable.insertOrUpdate(userId, 12000l-amount * 2)).thenReturn(result);
+        UserPoint resultPoint = pointService.use(userId, amount);
+
+        assertThat(resultPoint).isNotNull();
+        assertThat(resultPoint.point()).isEqualTo(12000l-amount * 2);
+
+    }
+
+
+    @Test
+    @DisplayName("같은 사용자가 충전과 사용 동시에 30초 이내에는 이용 했을때 오류 나는지 확인")
+    void 충전_사용_30초이내_유저_동시_접속자_테스트() throws InterruptedException {
+        Long userId = 1L;
+        long amount = 5000l;
+        UserPoint userPoint = new UserPoint(userId, 10000l, System.currentTimeMillis());
+
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(userPoint);
+
+        // 첫 번째 요청 성공
+        pointService.charge(userId, amount);
+
+        // 두 번째 요청 (30초 내)
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            pointService.use(userId, amount);
+        });
+
+        // then
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(exception.getReason()).isEqualTo( "사용자 포인트 이용 중입니다.");
+
+    }
+
+    @Test
+    @DisplayName("같은 사용자가 충전과 사용 30초 이후에는 이용 했을때 정상으로 되는지 확인")
+    void 사용_충전_30초이후_유저_동시_접속자_테스트() throws InterruptedException {
+        long userId = 1L;
+        long chargePoint = 5000l;
+        UserPoint userPoint = new UserPoint(userId, 10000l, System.currentTimeMillis());
+
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(userPoint);
+
+        // 첫 번째 요청 성공
+        pointService.use(userId, chargePoint);
+
+        TimeUnit.SECONDS.sleep(31);
+
+        long usePoint = 8000l;
+
+        // 두 번째 요청 (30초 이후)
+        userPoint = new UserPoint(userId, 10000l+chargePoint, System.currentTimeMillis());
+        UserPoint result = new UserPoint(userId, 10000l+ chargePoint - usePoint, System.currentTimeMillis());
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(userPoint);
+        when(userPointTable.insertOrUpdate(userId, 10000l+ chargePoint - usePoint)).thenReturn(result);
+        UserPoint resultPoint = pointService.use(userId, usePoint);
+
+        // then
+        assertThat(resultPoint).isNotNull();
+        assertThat(resultPoint.point()).isEqualTo(10000l+ chargePoint - usePoint);
+
+    }
+
+    @Test
+    @DisplayName("충전시 동시에 요청 테스트")
+    void 충전_동시_테스트() throws ExecutionException, InterruptedException {
+        // given
+        long userId = 1L;
+        long amount = 5000l;
+        UserPoint result = new UserPoint(userId, amount + userInfo.get(userId), System.currentTimeMillis());
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        // when, then
+        // 첫 번째 호출 (성공)
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(new UserPoint(userId, userInfo.get(userId), System.currentTimeMillis()));
+        when(userPointTable.insertOrUpdate(userId, 6000L)).thenReturn(result);
+        Future<UserPoint> firstAttempt = executor.submit(() -> pointService.charge(userId, amount));
+        //then
+        assertThat(firstAttempt.get()).isNotNull();
+
+        // 동시 요청 (바로 실행, 실패해야 함)
+        Future<ResponseStatusException> secondAttempt = executor.submit(() -> {
+            try {
+                pointService.charge(userId, amount);
+                return null;
+            } catch (ResponseStatusException e) {
+                return e;
+            }
+        });
+
+
+        ResponseStatusException exception = secondAttempt.get();
+        log.info(exception.toString());
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThat(exception.getReason()).isEqualTo("동일한 사용자에 대한 요청이 처리 중입니다.");
+
+    }
+
+    @Test
+    @DisplayName("사용시 동시에 요청 테스트")
+    void 사용_동시_테스트() throws ExecutionException, InterruptedException {
+        // given
+        long userId = 1L;
+        long amount = 5000l;
+        UserPoint result = new UserPoint(userId, 10000l, System.currentTimeMillis());
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        // when, then
+        // 첫 번째 호출 (성공)
+        // when
+        when(userPointTable.selectById(userId)).thenReturn(new UserPoint(userId, 10000l, System.currentTimeMillis()));
+        when(userPointTable.insertOrUpdate(userId, 5000L)).thenReturn(result);
+        Future<UserPoint> firstAttempt = executor.submit(() -> pointService.use(userId, amount));
+        //then
+        assertThat(firstAttempt.get()).isNotNull();
+
+        // 동시 요청 (바로 실행, 실패해야 함)
+        Future<ResponseStatusException> secondAttempt = executor.submit(() -> {
+            try {
+                pointService.use(userId, amount);
+                return null;
+            } catch (ResponseStatusException e) {
+                return e;
+            }
+        });
+
+
+        ResponseStatusException exception = secondAttempt.get();
+        log.info(exception.toString());
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThat(exception.getReason()).isEqualTo("동일한 사용자에 대한 요청이 처리 중입니다.");
+
+    }
 
 }
