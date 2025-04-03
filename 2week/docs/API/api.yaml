@@ -96,8 +96,6 @@ paths:
               properties:
                 userId:
                   type: integer
-                couponCode:
-                  type: string
       responses:
         200:
           description: 쿠폰 발급 성공
