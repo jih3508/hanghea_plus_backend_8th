@@ -13,11 +13,17 @@ tags:
   - PRODUCT
   - ORDER
 paths:
-  /balance/charge:
+  user/{userId}/balance/charge:
     post:
       summary: 잔액 충전
       tags:
-        - USER
+        - BALANCE
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -39,13 +45,15 @@ paths:
                     type: boolean
         '400':
           description: "잘못된 요청 (예: 음수 금액 충전)"
+        '404':
+          description: 사용자 없음
         '500':
           description: 서버 오류
-  /balance/{userId}:
+  user/{userId}/balance:
     get:
       summary: 잔액 조회
       tags:
-        - USER
+        - BALANCE
       parameters:
         - name: userId
           in: path
@@ -60,8 +68,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  balance:
+                  amount:
                     type: integer
+              example:
+                amount: 200000
         '404':
           description: 사용자 없음
   /coupons/{couponId}:
@@ -83,7 +93,7 @@ paths:
               type: object
               properties:
                 userId:
-                  type: string
+                  type: integer
                 couponCode:
                   type: string
       responses:
@@ -91,6 +101,41 @@ paths:
           description: 쿠폰 발급 성공
         400:
           description: 쿠폰 수량 부족 또는 유효기간 만료
+  user/{userId}/coupons:
+    get:
+      summary: 보유하는 쿠폰 목록
+      tags:
+        - COUPON
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  couponId:
+                    type: integer
+                    description: 쿠폰 아이디
+                  couponNumber:
+                    type: string
+                    description: 쿠폰번호
+                  type:
+                    type: string
+                    description: 할인 종류(정액, 정률)
+                  rate:
+                    type: integer
+                    description: 할인율
+                  discountPrice:
+                    type: integer
+                    description: 할인 금액
   /products/{productId}:
     get:
       summary: 상품 조회
@@ -110,14 +155,23 @@ paths:
               schema:
                 type: object
                 properties:
-                  productId:
-                    type: string
                   name:
                     type: string
                     description: 상품명
+                  productNumber:
+                    type: string
+                    description: 상품번호
+                  price:
+                    type: integer
+                    description: 가격
                   stock:
                     type: integer
                     description: 재고
+              example:
+                name: 맥북
+                productNumber: P-202101010001
+                price: 100000000
+                stock: 100
   /products/top:
     get:
       summary: 인기 상품 조회
@@ -134,11 +188,30 @@ paths:
                   type: object
                   properties:
                     productId:
-                      type: string
+                      type: integer
+                      description: 상품 PK
                     name:
                       type: string
+                      description: 상품명
+                    rank:
+                      type: integer
+                      description: 순위
                     salesCount:
                       type: integer
+                      description: 판매개수
+              example:
+                - productId: 1
+                  name: 맥북
+                  rank: 1
+                  salesCount: 100
+                - productId: 2
+                  name: 겔럭시북
+                  rank: 2
+                  salesCount: 60
+                - productId: 3
+                  name: 아이패드
+                  rank: 3
+                  salesCount: 50
 
   /order:
     post:
@@ -153,16 +226,20 @@ paths:
               type: object
               properties:
                 userId:
-                  type: string
+                  type: integer
+                  description: 사용자 pk
                 items:
                   type: array
                   items:
                     type: object
                     properties:
                       productId:
-                        type: string
+                        type: integer
+                        description: 상품 pk
                       quantity:
                         type: integer
+                        description: 수량
+
       responses:
         '200':
           description: 주문 성공
@@ -172,7 +249,7 @@ paths:
                 type: object
                 properties:
                   orderId:
-                    type: string
+                    type: integer
         '400':
           description: 재고 부족 또는 잘못된 요청
         '402':
