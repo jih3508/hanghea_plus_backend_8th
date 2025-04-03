@@ -1,0 +1,181 @@
+openapi: 3.0.0
+info:
+  title: E-Commerce Order API
+  description: e-커머스 상품 주문 서비스 API 문서
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: 로컬 서버
+tags:
+  - USER
+  - BALANCE
+  - COUPON
+  - PRODUCT
+  - ORDER
+paths:
+  /balance/charge:
+    post:
+      summary: 잔액 충전
+      tags:
+        - USER
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+      responses:
+        '200':
+          description: 충전 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: "잘못된 요청 (예: 음수 금액 충전)"
+        '500':
+          description: 서버 오류
+  /balance/{userId}:
+    get:
+      summary: 잔액 조회
+      tags:
+        - USER
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 잔액 정보 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: integer
+        '404':
+          description: 사용자 없음
+  /coupons/{couponId}:
+    post:
+      summary: 쿠폰 발급
+      tags:
+        - COUPON
+      parameters:
+        - name: couponId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                couponCode:
+                  type: string
+      responses:
+        200:
+          description: 쿠폰 발급 성공
+        400:
+          description: 쿠폰 수량 부족 또는 유효기간 만료
+  /products/{productId}:
+    get:
+      summary: 상품 조회
+      tags:
+        - PRODUCT
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 상품 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                  name:
+                    type: string
+                    description: 상품명
+                  stock:
+                    type: integer
+                    description: 재고
+  /products/top:
+    get:
+      summary: 인기 상품 조회
+      tags:
+        - PRODUCT
+      responses:
+        200:
+          description: 인기 상품 목록 반환
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    productId:
+                      type: string
+                    name:
+                      type: string
+                    salesCount:
+                      type: integer
+
+  /order:
+    post:
+      summary: 주문 요청
+      tags:
+        - ORDER
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: string
+                      quantity:
+                        type: integer
+      responses:
+        '200':
+          description: 주문 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+        '400':
+          description: 재고 부족 또는 잘못된 요청
+        '402':
+          description: 잔액 부족
+        '500':
+          description: 서버 오류
