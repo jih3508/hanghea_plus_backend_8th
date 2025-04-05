@@ -21,16 +21,16 @@ public class MockApiTest {
 
     @Test
     public void testChargeBalance() throws Exception {
-        mockMvc.perform(post("/balance/charge")
+        mockMvc.perform(post("/user/1/balance/charge")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"userId\": 1, \"amount\": 5000}"))
+                        .content("{\"amount\": 5000}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Balance charged successfully"));
     }
 
     @Test
     public void testGetBalance() throws Exception {
-        mockMvc.perform(get("/balance/10"))
+        mockMvc.perform(get("/user/1/balance"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.balance").exists());
     }
