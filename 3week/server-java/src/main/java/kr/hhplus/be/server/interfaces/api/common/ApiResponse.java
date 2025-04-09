@@ -17,6 +17,11 @@ public class ApiResponse<T> {
 
     private HttpStatus status;
 
+    public ApiResponse(HttpStatus status, T data) {
+        this.status = status;
+        this.data = data;
+    }
+
     public static ApiResponse<String> create(){
         return ApiResponse.<String>builder()
                 .data( "success create!!")

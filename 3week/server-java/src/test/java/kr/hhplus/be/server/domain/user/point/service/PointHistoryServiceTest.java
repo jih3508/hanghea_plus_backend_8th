@@ -1,9 +1,10 @@
 package kr.hhplus.be.server.domain.user.point.service;
 
+import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.user.entity.User;
-import kr.hhplus.be.server.domain.user.point.entity.PointHistory;
-import kr.hhplus.be.server.domain.user.point.entity.PointTransactionType;
-import kr.hhplus.be.server.domain.user.point.repository.PointHistoryRepository;
+import kr.hhplus.be.server.domain.point.entity.PointHistory;
+import kr.hhplus.be.server.domain.point.entity.PointTransactionType;
+import kr.hhplus.be.server.domain.point.repository.PointHistoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +25,7 @@ class PointHistoryServiceTest {
     private static final Logger log = LoggerFactory.getLogger(PointHistoryServiceTest.class);
 
     @InjectMocks
-    private PointHistoryService  service;
+    private PointHistoryService service;
 
     @Mock
     private PointHistoryRepository repository;

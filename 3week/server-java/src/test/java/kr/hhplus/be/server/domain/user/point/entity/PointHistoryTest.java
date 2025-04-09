@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.domain.user.point.entity;
 
+import kr.hhplus.be.server.domain.point.entity.PointHistory;
+import kr.hhplus.be.server.domain.point.entity.PointTransactionType;
 import kr.hhplus.be.server.domain.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
