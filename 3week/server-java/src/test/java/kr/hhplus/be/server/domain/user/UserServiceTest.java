@@ -44,7 +44,8 @@ class UserServiceTest {
 
 
         // then
-        assertThatThrownBy(() -> userService.findById(10L)).isInstanceOf(ApiExceptionResponse.class)
+        assertThatThrownBy(() -> userService.findById(10L))
+                .isInstanceOf(ApiExceptionResponse.class)
                 .hasMessage("없는 사용자 입니다.");
 
     }
