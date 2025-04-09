@@ -3,6 +3,7 @@ package kr.hhplus.be.server.interfaces.api.point;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import kr.hhplus.be.server.application.point.PointChargeCommand;
 import kr.hhplus.be.server.application.point.PointFacade;
+import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.interfaces.api.common.ApiResponse;
 import kr.hhplus.be.server.interfaces.api.common.ControllerTest;
 import kr.hhplus.be.server.interfaces.api.point.request.ChargeRequest;
@@ -13,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -20,7 +22,9 @@ import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -34,6 +38,36 @@ class PointControllerTest extends ControllerTest {
     @MockitoBean
     private PointFacade pointFacade;
 
+    @Test
+    @DisplayName("없는 사용자 조회시 오류!!")
+    void 포인트_조회_사용자X() throws Exception {
+        Long userId = 100L;
+
+        when(pointFacade.getPoint(anyLong())).thenThrow( new ApiExceptionResponse(HttpStatus.NOT_FOUND, "없는 사용자 입니다."));
+
+
+        // when & then
+        mockMvc.perform(
+                get("/point/{userId}", userId))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("잔액 정상적으로 조회 처리")
+    void 포인트_조회() throws Exception {
+        // given
+        Long userId = 1L;
+
+        when(pointFacade.getPoint(anyLong())).thenReturn(new BigDecimal(1_000_000));
+
+        // when & then
+        mockMvc.perform(
+                        get("/point/{userId}", userId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.amount").value(new BigDecimal(1_000_000)));
+    }
 
     @Test
     @DisplayName("충전시 amount는 필수로 넣어야 한다.")
@@ -78,8 +112,8 @@ class PointControllerTest extends ControllerTest {
         // given
         Long userId = 1L;
         ChargeRequest request = new ChargeRequest(BigDecimal.valueOf(10_000));
-        given(pointFacade.charge(any(PointChargeCommand.class)))
-                .willReturn(BigDecimal.valueOf(10_000));
+        when(pointFacade.charge(any(PointChargeCommand.class)))
+                .thenReturn(BigDecimal.valueOf(10_000));
 
 
         log.info(objectMapper.writeValueAsString(request));

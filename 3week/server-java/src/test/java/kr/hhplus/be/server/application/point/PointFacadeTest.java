@@ -9,8 +9,10 @@ import kr.hhplus.be.server.domain.point.service.PointService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +44,51 @@ class PointFacadeTest {
     private UserService userService;
 
     @Test
+    @DisplayName("없는 사용자는 조회 실패 되도록 한다.")
+    void 조회_사용자X(){
+        // when
+        when(userService.findById(anyLong())).thenThrow(new ApiExceptionResponse(HttpStatus.NOT_FOUND, "없는 사용자 입니다."));
+
+        //then
+        assertThatThrownBy(() -> facade.getPoint(100L))
+        .isInstanceOf(ApiExceptionResponse.class)
+                .hasMessage("없는 사용자 입니다.");
+        verify(service, never()).getPoint(anyLong());
+    }
+
+    @Test
+    @DisplayName("사용자 포인트 조회")
+    void 조회(){
+        // given
+        Long userId = 1L;
+        User user = User.builder()
+                .id(1L)
+                .userId("test")
+                .name("테스터")
+                .build();
+        Point point = Point.builder()
+                .id(1L)
+                .user(user)
+                .point(new BigDecimal(100_000))
+                .build();
+
+        // when
+        when(service.getPoint(anyLong())).thenReturn(point);
+        BigDecimal result = facade.getPoint(userId);
+
+        //then
+        InOrder inOrder = Mockito.inOrder(service, userService);
+        inOrder.verify(userService, times(1)).findById(userId);
+        inOrder.verify(service, times(1)).getPoint(anyLong());
+        assertThat(result).isEqualTo(new BigDecimal(100_000));
+
+
+    }
+
+
+    @Test
     @DisplayName("충전시 없는 유저일 경우 실패 한다.")
-    void 충전_유저X(){
+    void 충전_사용자X(){
 
 
         //given

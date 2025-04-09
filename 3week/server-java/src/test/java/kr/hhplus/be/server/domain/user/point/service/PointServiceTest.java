@@ -36,6 +36,44 @@ class PointServiceTest {
     private PointRepository repository;
 
     @Test
+    @DisplayName("포인트 정보가 없은 경우 포인트 조회 살패 한다.")
+    void 없는_포인트_조회(){
+        // given, when
+        when(repository.findByUserId(anyLong())).thenThrow(new ApiExceptionResponse(HttpStatus.NOT_FOUND, "포인트를 찾을 수 없습니다."));
+
+        // then
+        assertThatThrownBy(() -> service.getPoint(10L))
+                .isInstanceOf(ApiExceptionResponse.class)
+                .hasMessage("포인트를 찾을 수 없습니다.");
+
+    }
+
+    @Test
+    @DisplayName("포인트 정보가 없은 경우 포인트 정상적으로 조회")
+    void 포인트_조회(){
+        // given
+        User user = User.builder()
+                .id(1L)
+                .userId("test")
+                .name("테스터")
+                .build();
+
+        Point expected = Point.builder()
+                .id(1L)
+                .user(user)
+                .point(new BigDecimal(100_000))
+                .build();
+
+        // given, when
+        when(repository.findByUserId(1L)).thenReturn(Optional.of(expected));
+
+        Point point = service.getPoint(1L);
+
+        assertThat(point).isEqualTo(expected);
+    }
+
+
+    @Test
     @DisplayName("충전시 포인트 조회시 없으면 실패한다.")
     void 충전_포인트_조회_실패(){
         // given, when

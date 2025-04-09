@@ -20,6 +20,14 @@ public class PointFacade {
 
     private final UserService userService;
 
+    public BigDecimal getPoint(Long userId) {
+
+        userService.findById(userId);
+        Point point = service.getPoint(userId);
+
+        return point.getPoint();
+    }
+
     /*
      * method: charge
      * description: 포인트 충전

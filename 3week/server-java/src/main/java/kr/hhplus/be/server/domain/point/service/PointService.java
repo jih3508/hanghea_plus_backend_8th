@@ -16,13 +16,23 @@ public class PointService {
     private final PointRepository repository;
 
     /*
+     * method: getPoint
+     * description: 포인트 조회
+     */
+
+    public Point getPoint(Long userID) {
+
+        return repository.findByUserId(userID)
+                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "포인트를 찾을 수 없습니다."));
+    }
+
+    /*
      * method: charge
      * description: 포인트 충전
      */
     public Point charge(Long userID, BigDecimal amount) {
 
-        Point point = repository.findByUserId(userID)
-                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "포인트를 찾을 수 없습니다."));
+        Point point = this.getPoint(userID);
 
         point.charge(amount);
 

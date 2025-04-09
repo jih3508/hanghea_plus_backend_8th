@@ -32,4 +32,12 @@ public class PointController {
         return ApiResponse.ok(new PointResponse(result));
 
     }
+
+    @Operation(summary = "포인트 조회 API")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{userId}")
+    public ApiResponse<PointResponse> get(@PathVariable("userId") Long userId){
+        BigDecimal result = pointFacade.getPoint(userId);
+        return ApiResponse.ok(new PointResponse(result));
+    }
 }
