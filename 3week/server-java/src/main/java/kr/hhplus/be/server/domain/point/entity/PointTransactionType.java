@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.user.point.entity;
+package kr.hhplus.be.server.domain.point.entity;
 
 import lombok.Getter;
 

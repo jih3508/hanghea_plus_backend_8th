@@ -1,12 +1,9 @@
-package kr.hhplus.be.server.domain.user.point.entity;
+package kr.hhplus.be.server.domain.point.entity;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.user.entity.User;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
@@ -14,6 +11,7 @@ import java.math.BigDecimal;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@ToString
 public class Point {
 
     private static final BigDecimal MAX_POINT = new BigDecimal(1_000_000_000L);
