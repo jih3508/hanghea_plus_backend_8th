@@ -25,7 +25,8 @@ public class User {
     private String name; // 사용자명
 
     @CreatedDate
-    private LocalDateTime creatDateTime; // 생성 일시
+    @Column(name = "create_date_time", updatable = false)
+    private LocalDateTime createDateTime; // 생성 일시
 
     @LastModifiedDate
     private LocalDateTime updateDateTime; // 수정 일시
@@ -35,6 +36,6 @@ public class User {
         this.id = id;
         this.userId = userId;
         this.name = name;
-        this.creatDateTime = LocalDateTime.now();
+        this.createDateTime = LocalDateTime.now();
     }
 }
