@@ -23,14 +23,13 @@ public class CouponFacade {
 
     private final UserCouponService userCouponService;
 
-    private final CouponService couponService;
 
     @Transactional
     public void issue(CouponIssueCommand command) {
 
         User user = userService.findById(command.getUserId());
 
-        Coupon coupon = couponService.issueCoupon(command.getCouponId());
+        Coupon coupon = service.issueCoupon(command.getCouponId());
 
         userCouponService.save(user, coupon);
 
