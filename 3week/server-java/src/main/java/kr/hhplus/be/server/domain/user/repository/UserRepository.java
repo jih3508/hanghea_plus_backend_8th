@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.user;
+package kr.hhplus.be.server.domain.user.repository;
 
 import kr.hhplus.be.server.domain.user.entity.User;
 import org.springframework.stereotype.Repository;

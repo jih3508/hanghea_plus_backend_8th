@@ -1,6 +1,7 @@
-package kr.hhplus.be.server.domain.user;
+package kr.hhplus.be.server.domain.user.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.domain.user.repository.UserRepository;
 import kr.hhplus.be.server.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
