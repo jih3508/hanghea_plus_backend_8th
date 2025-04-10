@@ -2,16 +2,15 @@ package kr.hhplus.be.server.interfaces.api.coupon;
 
 import kr.hhplus.be.server.application.coupon.CouponFacade;
 import kr.hhplus.be.server.application.coupon.CouponIssueCommand;
+import kr.hhplus.be.server.application.coupon.CouponMeCommand;
 import kr.hhplus.be.server.interfaces.api.common.ApiResponse;
 import kr.hhplus.be.server.interfaces.api.coupon.request.CouponIssueRequest;
 import kr.hhplus.be.server.interfaces.api.coupon.response.CouponUserResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/coupons")
@@ -22,8 +21,10 @@ public class CouponController {
 
 
     @GetMapping("/{userId}")
-    public ResponseEntity<List<CouponUserResponse>> meCoupons(@PathVariable BigInteger userId) {
-        return ResponseEntity.ok(new ArrayList<CouponUserResponse>());
+    public ApiResponse<List<CouponUserResponse>> meCoupons(@PathVariable("userId") Long userId) {
+        List<CouponMeCommand> commands = facade.getMeCoupons(userId);
+        List<CouponUserResponse> responses = commands.stream().map(CouponUserResponse::of).collect(Collectors.toList());
+        return ApiResponse.ok(responses);
     }
 
 

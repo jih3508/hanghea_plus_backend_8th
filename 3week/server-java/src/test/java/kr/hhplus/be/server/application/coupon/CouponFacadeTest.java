@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.coupon.entity.Coupon;
 import kr.hhplus.be.server.domain.coupon.entity.CouponType;
 import kr.hhplus.be.server.domain.coupon.service.CouponService;
 import kr.hhplus.be.server.domain.user.entity.User;
+import kr.hhplus.be.server.domain.user.entity.UserCoupon;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -127,5 +129,56 @@ class CouponFacadeTest {
         // then
         verify(userCouponService, times(1)).save(user, coupon);
 
+    }
+
+
+    @Test
+    void 사용자_쿠폰_조회() {
+        // given
+        Long userId = 1L;
+        User user = mock(User.class);
+
+        Coupon coupon1 = Coupon.builder()
+                .id(101L)
+                .couponNumber("COUPON101")
+                .type(CouponType.FLAT)
+                .discountPrice(new BigDecimal("1000"))
+                .rate(null)
+                .build();
+
+        Coupon coupon2 = Coupon.builder()
+                .id(102L)
+                .couponNumber("COUPON102")
+                .type(CouponType.RATE)
+                .discountPrice(null)
+                .rate(10)
+                .build();
+
+        Coupon coupon3 = Coupon.builder()
+                .id(103L)
+                .couponNumber("COUPON103")
+                .type(CouponType.FLAT)
+                .discountPrice(new BigDecimal("2000"))
+                .rate(null)
+                .build();
+
+        UserCoupon userCoupon1 = UserCoupon.builder().user(user).coupon(coupon1).isUsed(false).build();
+        UserCoupon userCoupon2 = UserCoupon.builder().user(user).coupon(coupon2).isUsed(true).build();
+        UserCoupon userCoupon3 = UserCoupon.builder().user(user).coupon(coupon3).isUsed(false).build();
+
+        when(userCouponService.getUserCoupons(userId)).thenReturn(List.of(userCoupon1, userCoupon2, userCoupon3));
+
+        // when
+        List<CouponMeCommand> result = facade.getMeCoupons(userId);
+
+        // then
+        assertThat(result).hasSize(3);
+
+        assertThat(result).extracting("couponId").containsExactly(101L, 102L, 103L);
+        assertThat(result).extracting("couponNumber").containsExactly("COUPON101", "COUPON102", "COUPON103");
+        assertThat(result).extracting("type").containsExactly(CouponType.FLAT, CouponType.RATE, CouponType.FLAT);
+        assertThat(result).extracting("isUsed").containsExactly(false, true, false);
+
+        verify(userCouponService).getUserCoupons(userId);
     }
 }

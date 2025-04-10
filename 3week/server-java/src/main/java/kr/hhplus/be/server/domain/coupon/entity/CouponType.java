@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.domain.coupon.entity;
 
-import java.math.BigDecimal;
 
 public enum CouponType {
 

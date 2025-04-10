@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserCouponService {
@@ -44,6 +46,13 @@ public class UserCouponService {
                 .coupon(coupon)
                 .build();
         repository.saveUserCoupon(userCoupon);
+    }
+
+    /*
+     * method
+     */
+    public List<UserCoupon> getUserCoupons(Long userId) {
+        return repository.findAllByUserId(userId);
     }
 
 
