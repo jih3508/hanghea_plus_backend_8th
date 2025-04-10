@@ -8,16 +8,16 @@ servers:
     description: 로컬 서버
 tags:
   - USER
-  - BALANCE
+  - POINT
   - COUPON
   - PRODUCT
   - ORDER
 paths:
-  user/{userId}/balance/charge:
+  /point/charge/{userId}:
     post:
       summary: 잔액 충전
       tags:
-        - BALANCE
+        - POINT
       parameters:
         - name: userId
           in: path
@@ -51,11 +51,11 @@ paths:
           description: 사용자 없음
         '500':
           description: 서버 오류
-  user/{userId}/balance:
+  /point/{userId}:
     get:
       summary: 잔액 조회
       tags:
-        - BALANCE
+        - POINT
       parameters:
         - name: userId
           in: path
@@ -76,13 +76,13 @@ paths:
                 amount: 200000
         '404':
           description: 사용자 없음
-  /coupons/{couponId}:
+  /coupons/{userId}:
     post:
       summary: 쿠폰 발급
       tags:
         - COUPON
       parameters:
-        - name: couponId
+        - name: userId
           in: path
           required: true
           schema:
@@ -94,14 +94,13 @@ paths:
             schema:
               type: object
               properties:
-                userId:
+                couponId:
                   type: integer
       responses:
         200:
           description: 쿠폰 발급 성공
         400:
           description: 쿠폰 수량 부족 또는 유효기간 만료
-  user/{userId}/coupons:
     get:
       summary: 보유하는 쿠폰 목록
       tags:
@@ -213,11 +212,17 @@ paths:
                   rank: 3
                   salesCount: 50
 
-  /order:
+  /order/{userId}:
     post:
       summary: 주문 요청
       tags:
         - ORDER
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
