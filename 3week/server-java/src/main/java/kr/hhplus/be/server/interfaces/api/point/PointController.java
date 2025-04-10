@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 @Tag(name="POINT", description = "포인트 API")
 public class PointController {
 
+
     private final PointFacade pointFacade;
 
     @Operation(summary = "포인트 충전 API")
