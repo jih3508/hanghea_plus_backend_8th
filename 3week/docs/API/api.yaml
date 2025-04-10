@@ -135,6 +135,9 @@ paths:
                   discountPrice:
                     type: integer
                     description: 할인 금액
+                  isUsed:
+                    type: boolean
+                    description: 쿠폰 사용 여부
   /products/{productId}:
     get:
       summary: 상품 조회
