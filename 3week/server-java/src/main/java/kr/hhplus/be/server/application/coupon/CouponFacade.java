@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.coupon;
 
+import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.domain.coupon.entity.Coupon;
 import kr.hhplus.be.server.domain.coupon.service.CouponService;
 import kr.hhplus.be.server.domain.user.entity.User;
@@ -24,6 +25,7 @@ public class CouponFacade {
 
     private final CouponService couponService;
 
+    @Transactional
     public void issue(CouponIssueCommand command) {
 
         User user = userService.findById(command.getUserId());
