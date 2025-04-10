@@ -38,4 +38,16 @@ public class PointService {
 
         return repository.save(point);
     }
+
+    /*
+     * method: use
+     * description: 포인트 사용
+     */
+
+    public Point use(Long userID, BigDecimal amount) {
+        Point point = this.getPoint(userID);
+        point.use(amount);
+
+        return repository.save(point);
+    }
 }

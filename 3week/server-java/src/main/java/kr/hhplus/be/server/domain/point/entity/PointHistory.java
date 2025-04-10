@@ -28,6 +28,7 @@ public class PointHistory {
     @Enumerated(EnumType.STRING)
     PointTransactionType type;
 
+    @Column(name = "amount", precision = 10, scale = 2)
     private BigDecimal amount;
 
     @CreatedDate

@@ -25,4 +25,17 @@ public class UserCouponService {
 
         return userCoupon.getCoupon();
     }
+
+    /*
+     * method: useCoupon
+     * method: 쿠폰 사용 처리
+     */
+    public void useCoupon(Long userId, Long couponId) {
+        UserCoupon userCoupon = repository.findByUserIdAndCouponId(userId, couponId)
+                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "사용가능 한 쿠폰 없습니다."));
+        userCoupon.usedCoupon();
+        repository.saveUserCoupon(userCoupon);
+    }
+
+
 }

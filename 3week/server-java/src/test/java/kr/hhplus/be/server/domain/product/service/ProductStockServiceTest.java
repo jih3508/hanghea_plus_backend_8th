@@ -72,4 +72,60 @@ class ProductStockServiceTest {
 
     }
 
+    @Test
+    @DisplayName("제고 부족으로 출납처리 안되는 테스트")
+    void 재고_부족(){
+        // given
+        Product product = Product.builder()
+                .id(1L)
+                .name("노트북")
+                .price(new BigDecimal(2_000_000))
+                .category(ProductCategory.ELECTRONIC_DEVICES)
+                .build();
+
+        ProductStock stock = ProductStock.builder()
+                .id(1L)
+                .product(product)
+                .quantity(10)
+                .build();
+
+        int quantity = 100;
+
+        //when
+        when(repository.findByProductId(1L)).thenReturn(Optional.of(stock));
+
+        // then
+        assertThatThrownBy(()-> service.delivering(1L, quantity))
+                .isInstanceOf(ApiExceptionResponse.class)
+                .hasMessage("제고가 부족 합니다.");
+
+    }
+
+    @Test
+    @DisplayName("재고 출납 처리 테스트")
+    void 출납_처리(){
+        // given
+        Product product = Product.builder()
+                .id(1L)
+                .name("노트북")
+                .price(new BigDecimal(2_000_000))
+                .category(ProductCategory.ELECTRONIC_DEVICES)
+                .build();
+
+        ProductStock stock = ProductStock.builder()
+                .id(1L)
+                .product(product)
+                .quantity(10)
+                .build();
+
+        int quantity = 5;
+
+        when(repository.findByProductId(1L)).thenReturn(Optional.of(stock));
+        ProductStock result = service.delivering(1L, quantity);
+
+        verify(repository, times(1)).save(any());
+        assertThat(result.getQuantity()).isEqualTo(5);
+        assertThat(result.isStock()).isTrue();
+    }
+
 }

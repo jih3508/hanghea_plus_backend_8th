@@ -1,13 +1,10 @@
 package kr.hhplus.be.server.interfaces.api.point;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import kr.hhplus.be.server.application.point.PointChargeCommand;
 import kr.hhplus.be.server.application.point.PointFacade;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.interfaces.api.common.ApiResponse;
 import kr.hhplus.be.server.interfaces.api.common.ControllerTest;
 import kr.hhplus.be.server.interfaces.api.point.request.ChargeRequest;
-import kr.hhplus.be.server.interfaces.api.point.response.PointResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,9 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
-
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

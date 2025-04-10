@@ -157,5 +157,67 @@ class PointServiceTest {
 
     }
 
+    @Test
+    @DisplayName("포인트 사용시 잔고가 부족할 경우 사용 못하게 한다.")
+    public void 잔고_부족(){
+        // given
+        User user = User.builder()
+                .id(1L)
+                .userId("test")
+                .name("테스터")
+                .build();
+
+        Point point = Point.builder()
+                .id(1L)
+                .user(user)
+                .point(new BigDecimal(100_000))
+                .build();
+
+        BigDecimal amount = new BigDecimal(500_000L);
+
+        // when
+        when(repository.findByUserId(1l)).thenReturn(Optional.of(point));
+
+        assertThatThrownBy(() -> service.use(1l, amount))
+        .isInstanceOf(ApiExceptionResponse.class)
+                .hasMessage("잔액 부족!!!!");
+
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("포인트 사용시 사용자 포인트 정상적으로 차감 된다.")
+    public void 잔고_차감(){
+        // given
+        User user = User.builder()
+                .id(1L)
+                .userId("test")
+                .name("테스터")
+                .build();
+
+        Point point = Point.builder()
+                .id(1L)
+                .user(user)
+                .point(new BigDecimal(100_000))
+                .build();
+
+        BigDecimal amount = new BigDecimal(50_000L);
+
+        // when
+        when(repository.findByUserId(1l)).thenReturn(Optional.of(point));
+        when(repository.save(any(Point.class))).thenReturn(
+                Point.builder()
+                        .id(1L)
+                        .user(user)
+                        .point(new BigDecimal(50_000))
+                        .build()
+        );
+
+        Point result = service.use(1l, amount);
+
+        assertThat(result.getPoint()).isEqualTo(new BigDecimal(50_000L));
+        verify(repository, times(1)).save(any(Point.class));
+    }
+
 
 }

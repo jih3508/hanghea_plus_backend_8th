@@ -19,5 +19,17 @@ public class ProductStockService {
     }
 
 
+    /*
+     * method: delivering
+     * description: 출납처리
+     */
+    public ProductStock delivering(Long productId, Integer quantity){
+        ProductStock stock = this.getStock(productId);
+        stock.stockDelivering(quantity);
+        repository.save(stock);
+        return stock;
+    }
+
+
 
 }

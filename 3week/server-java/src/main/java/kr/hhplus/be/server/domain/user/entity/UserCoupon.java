@@ -31,4 +31,8 @@ public class UserCoupon {
         this.coupon = coupon;
         this.isUsed = isUsed;
     }
+
+    public void usedCoupon() {
+        this.isUsed = false;
+    }
 }

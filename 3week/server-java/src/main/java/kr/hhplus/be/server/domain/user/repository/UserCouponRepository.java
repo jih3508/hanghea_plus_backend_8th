@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface UserCouponRepository {
 
     Optional<UserCoupon> findByUserIdAndCouponId(Long userId, Long couponId);
+
+    void saveUserCoupon(UserCoupon userCoupon);
 }
