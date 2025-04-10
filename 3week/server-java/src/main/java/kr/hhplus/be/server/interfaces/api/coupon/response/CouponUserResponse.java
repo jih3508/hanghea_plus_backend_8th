@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.coupon.response;
+package kr.hhplus.be.server.interfaces.api.coupon.response;
 
 import lombok.Getter;
 import lombok.Setter;

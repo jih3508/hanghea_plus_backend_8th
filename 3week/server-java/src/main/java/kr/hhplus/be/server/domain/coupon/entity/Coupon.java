@@ -1,9 +1,11 @@
 package kr.hhplus.be.server.domain.coupon.entity;
 
 import jakarta.persistence.*;
+import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -66,6 +68,14 @@ public class Coupon {
     public Boolean isIssued() {
         return this.quantity > 0;
     }
+
+    public void  issueCoupon() {
+        if (!this.isIssued()) {
+            throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "발급할 쿠폰이 없습니다.");
+        }
+        this.quantity -= 1;
+    }
+
 
     public BigDecimal getDiscountPrice(BigDecimal price) {
         if(this.type.equals(CouponType.FLAT)){
