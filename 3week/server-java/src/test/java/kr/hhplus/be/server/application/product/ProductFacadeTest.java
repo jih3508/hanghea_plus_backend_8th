@@ -1,9 +1,12 @@
 package kr.hhplus.be.server.application.product;
 
+import kr.hhplus.be.server.application.point.ProductRankCommand;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.product.entity.Product;
 import kr.hhplus.be.server.domain.product.entity.ProductCategory;
+import kr.hhplus.be.server.domain.product.entity.ProductRank;
 import kr.hhplus.be.server.domain.product.entity.ProductStock;
+import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,6 +38,9 @@ class ProductFacadeTest {
 
     @Mock
     private ProductStockService stockService;
+
+    @Mock
+    private ProductRankService rankService;
 
     @Test
     @DisplayName("조회시 상품에 대한 데이터가 없을 경우")
@@ -92,5 +100,64 @@ class ProductFacadeTest {
 
     }
 
+
+    @Test
+    @DisplayName("상위 상품 조회 테스트")
+    void 상위_상품(){
+
+        // given
+        Product product1 = Product.builder()
+                .id(1L)
+                .name("상품1")
+                .build();
+
+        Product product2= Product.builder()
+                .id(12L)
+                .name("상품2")
+                .build();
+
+
+        Product product3= Product.builder()
+                .id(3L)
+                .name("상품3")
+                .build();
+
+        ProductRank rank1 = ProductRank.builder()
+                .id(1L)
+                .rankDate(LocalDate.now())
+                .product(product1)
+                .rank(1)
+                .totalQuantity(100)
+                .build();
+
+
+        ProductRank rank2 = ProductRank.builder()
+                .id(2L)
+                .rankDate(LocalDate.now())
+                .product(product2)
+                .rank(2)
+                .totalQuantity(70)
+                .build();
+
+
+        ProductRank rank3 = ProductRank.builder()
+                .id(2L)
+                .rankDate(LocalDate.now())
+                .product(product3)
+                .rank(3)
+                .totalQuantity(50)
+                .build();
+
+
+        List<ProductRank> ranks = List.of(rank1, rank2, rank3);
+
+        //when
+        when(rankService.todayProductRank()).thenReturn(ranks);
+
+        List<ProductRankCommand> commands = facade.todayProductRank();
+
+        assertThat(commands.size()).isEqualTo(3);
+
+    }
 
 }

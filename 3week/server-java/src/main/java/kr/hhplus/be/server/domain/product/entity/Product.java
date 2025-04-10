@@ -40,6 +40,7 @@ public class Product {
         this.name = name;
         this.price = price;
         this.category = category;
+        this.createDateTime = LocalDateTime.now();
 
     }
 

@@ -6,6 +6,7 @@ import kr.hhplus.be.server.domain.order.entity.OrderProductHistory;
 import kr.hhplus.be.server.domain.order.repository.OrderItemRepository;
 import kr.hhplus.be.server.domain.order.repository.OrderProductHistoryRepository;
 import kr.hhplus.be.server.domain.order.repository.OrderRepository;
+import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.domain.user.dto.OrderInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,14 @@ public class OrderService {
     public String createOrderNumber(){
         LocalDateTime now = LocalDateTime.now();
         return String.format("{0}{1}{2}%08d", now.getYear(), now.getMonth(), now.getDayOfMonth(), (int)(Math.random() * 1_000_000_000) + 1);
+    }
+
+    /*
+     * method: threeDaysOrderProductHistory
+     * description: 3일안 주문한 상품 정보 가져오기
+     */
+    public List<OrderHistoryProductGroupVo> threeDaysOrderProductHistory(){
+        return historyRepository.findGroupByProductIdThreeDays();
     }
 
 }

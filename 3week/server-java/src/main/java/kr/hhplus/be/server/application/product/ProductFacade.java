@@ -1,12 +1,17 @@
 package kr.hhplus.be.server.application.product;
 
+import kr.hhplus.be.server.application.point.ProductRankCommand;
 import kr.hhplus.be.server.domain.product.entity.Product;
+import kr.hhplus.be.server.domain.product.entity.ProductRank;
 import kr.hhplus.be.server.domain.product.entity.ProductStock;
+import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +22,7 @@ public class ProductFacade {
 
     private final ProductStockService stockService;
 
+    private final ProductRankService rankService;
 
     /*
      * method: getProduct
@@ -30,4 +36,17 @@ public class ProductFacade {
         return ProductInfoCommand.toCommand(product, stock);
     }
 
+
+    /*
+     * method:
+     * description: 상품 랭크 리스트
+     */
+
+    public List<ProductRankCommand> todayProductRank(){
+
+        List<ProductRank> rank =  rankService.todayProductRank();
+        List<ProductRankCommand> command = rank.stream().map(ProductRankCommand::from).toList();
+        return command;
+
+    }
 }

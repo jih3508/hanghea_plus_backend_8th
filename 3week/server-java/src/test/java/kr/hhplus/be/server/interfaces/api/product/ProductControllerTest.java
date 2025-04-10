@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.interfaces.api.product;
 
+import kr.hhplus.be.server.application.point.ProductRankCommand;
 import kr.hhplus.be.server.application.product.ProductFacade;
 import kr.hhplus.be.server.application.product.ProductInfoCommand;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -59,6 +61,48 @@ class ProductControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$.data.name").value("노드북"))
                 .andDo(print());
 
+
+    }
+
+    @Test
+    @DisplayName("상위 상품 조회 테스트")
+    void 상위_상품() throws Exception {
+        // given
+        ProductRankCommand rank1 = ProductRankCommand.builder()
+                .productId(1l)
+                .name("상품 A")
+                .rank(1)
+                .totalQuantity(200)
+                .build();
+
+        ProductRankCommand rank2 = ProductRankCommand.builder()
+                .productId(2l)
+                .name("상품 B")
+                .rank(2)
+                .totalQuantity(100)
+                .build();
+
+        ProductRankCommand rank3 = ProductRankCommand.builder()
+                .productId(3l)
+                .name("상품 C")
+                .rank(1)
+                .totalQuantity(90)
+                .build();
+
+        List<ProductRankCommand> mockRanks = List.of(rank1, rank2);
+
+        // When & Then
+        mockMvc.perform(get("/products/top"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(3))
+                .andExpect(jsonPath("$.data[0].productId").value(1))
+                .andExpect(jsonPath("$.data[0].name").value("상품 A"))
+                .andExpect(jsonPath("$.data[0].price").value(10000))
+                .andExpect(jsonPath("$.data[0].rank").value(1))
+                .andExpect(jsonPath("$.data[0].quantity").value(50))
+                .andExpect(jsonPath("$.data[1].productId").value(2))
+                .andExpect(jsonPath("$.data[1].rank").value(2));
 
     }
 

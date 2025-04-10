@@ -2,13 +2,18 @@ package kr.hhplus.be.server.interfaces.api.product;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.hhplus.be.server.application.point.ProductRankCommand;
 import kr.hhplus.be.server.application.product.ProductFacade;
 import kr.hhplus.be.server.application.product.ProductInfoCommand;
 import kr.hhplus.be.server.interfaces.api.common.ApiResponse;
 import kr.hhplus.be.server.interfaces.api.product.response.ProductInfoResponse;
+import kr.hhplus.be.server.interfaces.api.product.response.ProductTopResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/products")
@@ -25,6 +30,16 @@ public class ProductController {
         ProductInfoCommand  command = facade.getProduct(productId);
         ProductInfoResponse response = ProductInfoResponse.toResponse(command);
         return ApiResponse.ok(response);
+    }
+
+    @Operation(summary = "상위 상품 조회 API")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/top")
+    public ApiResponse<List<ProductTopResponse>> topProducts(){
+        List<ProductRankCommand> commands = facade.todayProductRank();
+        List<ProductTopResponse> responses = commands.stream().map(ProductTopResponse::of).collect(Collectors.toList());
+        return ApiResponse.ok(responses);
+
     }
 
 }
