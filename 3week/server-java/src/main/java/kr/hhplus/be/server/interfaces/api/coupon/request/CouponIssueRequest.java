@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.coupon.request;
+package kr.hhplus.be.server.interfaces.api.coupon.request;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +11,6 @@ import java.math.BigInteger;
 @ToString
 public class CouponIssueRequest {
 
-    private BigInteger userId;
+    private Long couponId;
 
 }

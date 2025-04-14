@@ -35,4 +35,5 @@ public class UserCoupon {
     public void usedCoupon() {
         this.isUsed = false;
     }
+
 }
