@@ -7,6 +7,7 @@ import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.entity.Order;
 import kr.hhplus.be.server.domain.order.entity.OrderItem;
 import kr.hhplus.be.server.domain.order.service.OrderService;
+import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
@@ -50,6 +51,9 @@ class OrderFacadeTest {
 
     @Mock
     private PointService pointService;
+
+    @Mock
+    private PointHistoryService pointHistoryService;
 
     @Mock
     private ProductService productService;
@@ -126,6 +130,7 @@ class OrderFacadeTest {
         verify(orderService, times(1)).save(any(Order.class));
         verify(orderService, times(1)).save(any(Order.class), anyList());
         verify(pointService, times(1)).use(any(), any());
+        verify(pointHistoryService, times(1)).useHistory(any(), any());
         verify(externalTransmissionService, times(1)).sendOrderData();
 
     }
@@ -156,6 +161,7 @@ class OrderFacadeTest {
         verify(orderService, times(1)).save(any(Order.class));
         verify(orderService, times(1)).save(any(Order.class), anyList());
         verify(pointService, never()).use(any(), any());
+        verify(pointHistoryService, never()).useHistory(any(), any());
         verify(externalTransmissionService, times(1)).sendOrderData();
 
     }

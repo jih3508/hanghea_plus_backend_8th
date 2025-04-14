@@ -7,6 +7,7 @@ import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.entity.Order;
 import kr.hhplus.be.server.domain.order.entity.OrderItem;
 import kr.hhplus.be.server.domain.order.service.OrderService;
+import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
 import kr.hhplus.be.server.domain.product.entity.Product;
 import kr.hhplus.be.server.domain.product.service.ProductService;
@@ -20,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,6 +34,8 @@ public class OrderFacade {
     private final UserService userService;
 
     private final PointService  pointService;
+
+    private final PointHistoryService pointHistoryService;
 
     private final ProductService productService;
 
@@ -74,7 +76,8 @@ public class OrderFacade {
 
         // 결제 처리
         if(order.getTotalPrice().compareTo(totalPrice) > 0){
-             pointService.use(command.getUserId(), totalPrice);
+            pointService.use(command.getUserId(), totalPrice);
+            pointHistoryService.useHistory(user, totalPrice);
         }
 
         // 외부 데이터 전송
