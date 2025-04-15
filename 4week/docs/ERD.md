@@ -1,20 +1,20 @@
 ### ERD
 ```mermaid
 erDiagram
-    USER ||--|| BALANCE: ""
-    USER ||--o{ BALANCE_HISTORY: ""
+    USER ||--|| POINT: ""
+    USER ||--o{ POINT_HISTORY: ""
     USER |o--o{ USER_COUPON: ""
-    USER |o--o{ COUPON_HISTORY: ""
     USER |o--o{ ORDER: ""
     
     COUPON |o--o{ USER_COUPON: ""
-    COUPON |o--o{ COUPON_HISTORY: ""
     
     PRODUCT ||--|| PRODUCT_STOCK: ""
     PRODUCT |o--o{ PRODUCT_RANK: ""
     PRODUCT |o--o{ ORDER_ITEM:""
+    PRODUCT |o--o{ ORDER_PRODUCT_HISTORY:""
     
     ORDER ||--o{ ORDER_ITEM:""
+    ORDER |o--o{ORDER_PRODUCT_HISTORY:""
     
     USER {
         BIGINT id PK "유저 PK"
@@ -24,13 +24,13 @@ erDiagram
         DATETIME updated_date_time "수정 일시"
     }
 
-    BALANCE {
+    POINT {
         BIGINT id PK "잔고 PK"
         BIGINT user_id FK "유저 id"
         DECIMAL amount "잔액"
     }
 
-    BALANCE_HISTORY{
+    POINT_HISTORY{
         BIGINT id PK 
         BIGINT user_id FK "유저 fk"
         ENUM type "충저 || 사용"
@@ -58,13 +58,7 @@ erDiagram
         DATETIME issued_date_time "발급 일시"
     }
 
-    COUPON_HISTORY{
-        BIGINT id PK
-        BIGINT user_id FK "유저 fk"
-        BIGINT coupon_id FK "쿠폰 fk"
-        ENUM type "발급 || 사용"
-        DATETIME created_date_time "발급 일시"
-    }
+
 
     PRODUCT{
         BIGINT id PK
@@ -127,7 +121,6 @@ erDiagram
 |`BALANCE_HISTORY`| 사용자 잔고 이력   |
 |`COUPON`| 쿠폰          |
 |`USER_COUPON`| 사용자 보유 쿠폰   |
-|`COUPON_HISTORY`| 쿠폰 이력       |
 |`PRODUCT`| 상품          |
 |`PRODUCT_STOCK`| 재고          |
 |`ORDER`| 주문          |
