@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.point;
 
+import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.domain.user.service.UserService;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.point.entity.Point;
@@ -21,6 +22,7 @@ public class PointFacade {
 
     private final UserService userService;
 
+    @Transactional(readOnly = true)
     public BigDecimal getPoint(Long userId) {
 
         userService.findById(userId);
@@ -33,13 +35,13 @@ public class PointFacade {
      * method: charge
      * description: 포인트 충전
      */
-    @Transactional
+    @Transactional(rollbackFor =  Exception.class)
     public BigDecimal charge(PointChargeCommand command) {
 
-        User user = userService.findById(command.getUserID());
+        DomainUser user = userService.findById(command.getUserID());
         Point point = service.charge(command.getUserID(), command.getAmount());
 
-        historyService.chargeHistory(user, command.getAmount());
+        //historyService.chargeHistory(user, command.getAmount());
 
         return point.getPoint();
     }

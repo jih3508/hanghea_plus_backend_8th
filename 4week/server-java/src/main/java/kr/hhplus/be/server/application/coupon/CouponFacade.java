@@ -3,6 +3,7 @@ package kr.hhplus.be.server.application.coupon;
 import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.domain.coupon.entity.Coupon;
 import kr.hhplus.be.server.domain.coupon.service.CouponService;
+import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
@@ -27,11 +28,11 @@ public class CouponFacade {
     @Transactional
     public void issue(CouponIssueCommand command) {
 
-        User user = userService.findById(command.getUserId());
+        DomainUser user = userService.findById(command.getUserId());
 
         Coupon coupon = service.issueCoupon(command.getCouponId());
 
-        userCouponService.save(user, coupon);
+        userCouponService.save(null, coupon);
 
     }
 

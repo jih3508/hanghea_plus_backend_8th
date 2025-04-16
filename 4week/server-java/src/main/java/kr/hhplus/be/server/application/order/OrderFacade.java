@@ -12,6 +12,7 @@ import kr.hhplus.be.server.domain.point.service.PointService;
 import kr.hhplus.be.server.domain.product.entity.Product;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
+import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
@@ -51,7 +52,7 @@ public class OrderFacade {
     @Transactional
     public void order(OrderCommand command){
 
-        User user = userService.findById(command.getUserId());
+        DomainUser user = userService.findById(command.getUserId());
 
         // 주문 처리
         List<OrderItem> items = new LinkedList<>();
@@ -65,7 +66,7 @@ public class OrderFacade {
         }
 
         Order order = Order.builder()
-                .user(user)
+                .user(null)
                 .orderNumber(service.createOrderNumber())
                 .totalPrice(totalPrice)
                 .discountPrice(totalPrice)
@@ -77,7 +78,7 @@ public class OrderFacade {
         // 결제 처리
         if(order.getTotalPrice().compareTo(totalPrice) > 0){
             pointService.use(command.getUserId(), totalPrice);
-            pointHistoryService.useHistory(user, totalPrice);
+            pointHistoryService.useHistory(null, totalPrice);
         }
 
         // 외부 데이터 전송

@@ -19,7 +19,8 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<DomainUser> findById(Long id) {
         Optional<User> user = userJpaRepository.findById(id);
 
-        return userJpaRepository.findById(id).ifPresentOrElse(User::toDomain, ()-> Optional.empty());
+        return userJpaRepository.findById(id)
+                .map(User::toDomain);
     }
 
     @Override

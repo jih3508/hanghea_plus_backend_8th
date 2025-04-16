@@ -1,9 +1,9 @@
-package kr.hhplus.be.server.domain.user;
+package kr.hhplus.be.server.domain.user.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.user.repository.UserRepository;
-import kr.hhplus.be.server.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ class UserServiceTest {
     @DisplayName("사용자가 있으면 User 객체를 전달 해줘야 한다.")
     void 사용자_있는_경우(){
         // given
-        User user = User.builder()
+        DomainUser user = DomainUser.builder()
                 .id(1L)
                 .userId("test")
                 .name("테스터")
@@ -66,7 +66,7 @@ class UserServiceTest {
 
         // when
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        User result = userService.findById(1L);
+        DomainUser result = userService.findById(1L);
 
         // then
         verify(userRepository, times(1)).findById(1L);

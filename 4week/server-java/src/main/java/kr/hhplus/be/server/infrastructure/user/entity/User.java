@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Table(name = "user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
@@ -31,6 +32,7 @@ public class User {
     private LocalDateTime createDateTime; // 생성 일시
 
     @LastModifiedDate
+    @Column(name = "update_date_time", updatable = true)
     private LocalDateTime updateDateTime; // 수정 일시
 
     @Builder
