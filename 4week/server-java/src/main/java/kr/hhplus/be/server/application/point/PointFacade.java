@@ -1,9 +1,7 @@
 package kr.hhplus.be.server.application.point;
 
-import kr.hhplus.be.server.domain.product.entity.ProductRank;
-import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.user.service.UserService;
-import kr.hhplus.be.server.domain.user.entity.User;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.point.entity.Point;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
@@ -12,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

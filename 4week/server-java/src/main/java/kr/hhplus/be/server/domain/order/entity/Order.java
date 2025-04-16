@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.order.entity;
 
 import jakarta.persistence.*;
-import kr.hhplus.be.server.domain.user.entity.User;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;

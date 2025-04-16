@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.user.point.service;
 
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
-import kr.hhplus.be.server.domain.user.entity.User;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.point.entity.PointHistory;
 import kr.hhplus.be.server.domain.point.entity.PointTransactionType;
 import kr.hhplus.be.server.domain.point.repository.PointHistoryRepository;

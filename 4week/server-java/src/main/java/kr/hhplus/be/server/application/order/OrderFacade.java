@@ -12,7 +12,7 @@ import kr.hhplus.be.server.domain.point.service.PointService;
 import kr.hhplus.be.server.domain.product.entity.Product;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
-import kr.hhplus.be.server.domain.user.entity.User;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;

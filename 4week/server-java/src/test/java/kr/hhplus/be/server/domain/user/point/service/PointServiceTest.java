@@ -2,7 +2,7 @@ package kr.hhplus.be.server.domain.user.point.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.point.service.PointService;
-import kr.hhplus.be.server.domain.user.entity.User;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.point.entity.Point;
 import kr.hhplus.be.server.domain.point.repository.PointRepository;
 import org.junit.jupiter.api.DisplayName;

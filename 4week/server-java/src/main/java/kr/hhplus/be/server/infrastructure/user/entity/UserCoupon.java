@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.user.entity;
+package kr.hhplus.be.server.infrastructure.user.entity;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.coupon.entity.Coupon;

@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.user.repository;
 
-import kr.hhplus.be.server.domain.user.entity.User;
+import kr.hhplus.be.server.domain.user.model.CreateUser;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -9,4 +10,6 @@ import java.util.Optional;
 public interface UserRepository {
 
     Optional<User> findById(Long id);
+
+    User save(CreateUser user);
 }

@@ -1,6 +1,7 @@
-package kr.hhplus.be.server.domain.user.entity;
+package kr.hhplus.be.server.infrastructure.user.entity;
 
 import jakarta.persistence.*;
+import kr.hhplus.be.server.domain.user.model.CreateUser;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -38,4 +39,12 @@ public class User {
         this.name = name;
         this.createDateTime = LocalDateTime.now();
     }
+
+    public static User create(CreateUser createUser) {
+        return User.builder()
+                .userId(createUser.getId())
+                .name(createUser.getName())
+                .build();
+    }
+
 }
