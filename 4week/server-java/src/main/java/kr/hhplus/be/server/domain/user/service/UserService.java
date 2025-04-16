@@ -22,9 +22,9 @@ public class UserService {
     }
 
     /*
-     *
+     * method: save
+     * 회원 저장
      */
-
     public User save(String id, String name) {
         CreateUser user = new CreateUser(id, name);
         return userRepository.save(user);

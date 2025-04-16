@@ -2,6 +2,7 @@ package kr.hhplus.be.server.infrastructure.user.entity;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.user.model.CreateUser;
+import kr.hhplus.be.server.domain.user.model.DomainUser;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -44,6 +45,15 @@ public class User {
         return User.builder()
                 .userId(createUser.getId())
                 .name(createUser.getName())
+                .build();
+    }
+
+    public DomainUser toDomain(){
+        return DomainUser.builder()
+                .id(this.id)
+                .name(this.name)
+                .createDateTime(this.createDateTime)
+                .updateDateTime(this.updateDateTime)
                 .build();
     }
 
