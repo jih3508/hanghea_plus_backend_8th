@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.domain.product.entity;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.infrastructure.product.entity.Product;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductStock;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

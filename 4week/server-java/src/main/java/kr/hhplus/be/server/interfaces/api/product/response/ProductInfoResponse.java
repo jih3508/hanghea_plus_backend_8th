@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.interfaces.api.product.response;
 
 import kr.hhplus.be.server.application.product.ProductInfoCommand;
-import kr.hhplus.be.server.domain.product.entity.ProductCategory;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import lombok.*;
 
 import java.math.BigDecimal;

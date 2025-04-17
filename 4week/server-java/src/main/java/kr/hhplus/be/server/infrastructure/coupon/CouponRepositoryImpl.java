@@ -1,0 +1,35 @@
+package kr.hhplus.be.server.infrastructure.coupon;
+
+import kr.hhplus.be.server.domain.coupon.model.CreateCoupon;
+import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
+import kr.hhplus.be.server.domain.coupon.model.UpdateCoupon;
+import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+@RequiredArgsConstructor
+public class CouponRepositoryImpl implements CouponRepository {
+
+    private final CouponJpaRepository jpaRepository;
+
+    @Override
+    public Optional<DomainCoupon> findById(long id) {
+        return jpaRepository.findById(id).map(Coupon::toDomain);
+    }
+
+    @Override
+    public DomainCoupon create(CreateCoupon createCoupon) {
+        return jpaRepository.save(Coupon.createCoupon(createCoupon)).toDomain();
+    }
+
+    @Override
+    public DomainCoupon update(UpdateCoupon updateCoupon) {
+        Coupon coupon = jpaRepository.findById(updateCoupon.getCouponId()).get();
+        coupon.setQuantity(updateCoupon.getQuantity());
+        return jpaRepository.save(coupon).toDomain();
+    }
+}

@@ -4,7 +4,7 @@ import kr.hhplus.be.server.application.coupon.CouponFacade;
 import kr.hhplus.be.server.application.coupon.CouponIssueCommand;
 import kr.hhplus.be.server.application.coupon.CouponMeCommand;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.coupon.entity.CouponType;
+import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import kr.hhplus.be.server.interfaces.api.common.ControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

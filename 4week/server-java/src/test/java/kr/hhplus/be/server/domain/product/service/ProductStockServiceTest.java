@@ -1,9 +1,10 @@
 package kr.hhplus.be.server.domain.product.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.product.entity.Product;
-import kr.hhplus.be.server.domain.product.entity.ProductCategory;
-import kr.hhplus.be.server.domain.product.entity.ProductStock;
+import kr.hhplus.be.server.domain.product.model.DomainProductStock;
+import kr.hhplus.be.server.infrastructure.product.entity.Product;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductStock;
 import kr.hhplus.be.server.domain.product.repository.ProductStockRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,15 +58,15 @@ class ProductStockServiceTest {
                 .category(ProductCategory.ELECTRONIC_DEVICES)
                 .build();
 
-        ProductStock stock = ProductStock.builder()
+        DomainProductStock stock = DomainProductStock.builder()
                 .id(1L)
-                .product(product)
+                .productId(1L)
                 .quantity(10)
                 .build();
 
         // when
         when(repository.findByProductId(anyLong())).thenReturn(Optional.of(stock));
-        ProductStock result = service.getStock(1L);
+        DomainProductStock result = service.getStock(1L);
 
         // then
         assertThat(result).isEqualTo(stock);
@@ -83,9 +84,9 @@ class ProductStockServiceTest {
                 .category(ProductCategory.ELECTRONIC_DEVICES)
                 .build();
 
-        ProductStock stock = ProductStock.builder()
+        DomainProductStock stock = DomainProductStock.builder()
                 .id(1L)
-                .product(product)
+                .productId(1L)
                 .quantity(10)
                 .build();
 
@@ -112,18 +113,18 @@ class ProductStockServiceTest {
                 .category(ProductCategory.ELECTRONIC_DEVICES)
                 .build();
 
-        ProductStock stock = ProductStock.builder()
+        DomainProductStock stock = DomainProductStock.builder()
                 .id(1L)
-                .product(product)
+                .productId(1L)
                 .quantity(10)
                 .build();
 
         int quantity = 5;
 
         when(repository.findByProductId(1L)).thenReturn(Optional.of(stock));
-        ProductStock result = service.delivering(1L, quantity);
+        DomainProductStock result = service.delivering(1L, quantity);
 
-        verify(repository, times(1)).save(any());
+        verify(repository, times(1)).update(any());
         assertThat(result.getQuantity()).isEqualTo(5);
         assertThat(result.isStock()).isTrue();
     }
