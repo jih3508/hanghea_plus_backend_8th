@@ -14,7 +14,7 @@ public interface OrderProductHistoryJpaRepository extends JpaRepository<OrderPro
             "FROM OrderProductHistory o " +
             "WHERE o.createDateTime >= :startDate " +
             "GROUP BY o.productId " +
-            "ORDER BY o.productId")
+            "ORDER BY SUM(o.quantity) DESC")
     List<OrderHistoryProductGroupVo> findGroupByProductIdThreeDays(LocalDateTime startDate);
 
     List<OrderProductHistory> findByOrderId(Long orderId);

@@ -4,6 +4,9 @@ import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
+import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
+import kr.hhplus.be.server.domain.product.model.DomainProduct;
+import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.infrastructure.order.entity.Order;
 import kr.hhplus.be.server.domain.order.service.OrderService;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
@@ -52,6 +55,9 @@ class OrderFacadeTest {
 
     @Mock
     private ProductService productService;
+
+    @Mock
+    private ProductRankService productRankService;
 
     @Mock
     private ProductStockService productStockService;
@@ -155,6 +161,29 @@ class OrderFacadeTest {
         verify(pointService, never()).use(any(), any());
         verify(pointHistoryService, never()).useHistory(any(), any());
         verify(externalTransmissionService, times(1)).sendOrderData();
+
+    }
+
+
+    @Test
+    @DisplayName("랭킹이력 저장 테스트")
+    void saveRank(){
+        // given
+        DomainProduct product = mock(DomainProduct.class);
+
+        OrderHistoryProductGroupVo groupVo1 = mock(OrderHistoryProductGroupVo.class);
+        OrderHistoryProductGroupVo groupVo2 = mock(OrderHistoryProductGroupVo.class);
+        OrderHistoryProductGroupVo groupVo3 = mock(OrderHistoryProductGroupVo.class);
+        OrderHistoryProductGroupVo groupVo4 = mock(OrderHistoryProductGroupVo.class);
+        List<OrderHistoryProductGroupVo> list = List.of(groupVo1, groupVo2, groupVo3, groupVo4);
+
+
+        // when
+        when(productService.getProduct(anyLong())).thenReturn(product);
+
+        //then
+        verify(productService, times(4)).getProduct(anyLong());
+        verify(productRankService, times(1)).save(anyList());
 
     }
 

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.product;
 
+import kr.hhplus.be.server.domain.product.model.DomainProductRank;
 import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
 import lombok.*;
 
@@ -19,10 +20,10 @@ public class ProductRankCommand {
     private Integer totalQuantity;
 
 
-    public static ProductRankCommand from(ProductRank productRank){
+    public static ProductRankCommand from(DomainProductRank productRank){
         return ProductRankCommand.builder()
-                .productId(productRank.getProduct().getId())
-                .name(productRank.getProduct().getName())
+                .productId(productRank.getId())
+                .name(productRank.getProductName())
                 .rank(productRank.getRank())
                 .totalQuantity(productRank.getTotalQuantity())
                 .build();

@@ -4,8 +4,11 @@ import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
+import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
+import kr.hhplus.be.server.domain.product.model.CreateProductRank;
 import kr.hhplus.be.server.domain.product.model.DomainProduct;
 import kr.hhplus.be.server.domain.product.model.DomainProductStock;
+import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
 import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
@@ -20,6 +23,7 @@ import kr.hhplus.be.server.domain.product.service.ProductStockService;
 import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -52,6 +56,8 @@ public class OrderFacade {
     private final OrderService orderService;
 
     private final ExternalTransmissionService  externalTransmissionService;
+
+    private final ProductRankService productRankService;
 
 
     @Transactional
@@ -102,6 +108,28 @@ public class OrderFacade {
     public String createOrderNumber(){
         LocalDateTime now = LocalDateTime.now();
         return String.format("{0}{1}{2}%08d", now.getYear(), now.getMonth(), now.getDayOfMonth(), (int)(Math.random() * 1_000_000_000) + 1);
+    }
+
+    public void updateRank(){
+        List<OrderHistoryProductGroupVo> list = orderService.threeDaysOrderProductHistory();
+        int size = list.size();
+        List<CreateProductRank> productRanks = new LinkedList<>();
+
+
+        for (int i = 0; i < size; i++) {
+            OrderHistoryProductGroupVo vo = list.get(i);
+            DomainProduct product = productService.getProduct(vo.productId());
+
+            CreateProductRank rank = CreateProductRank.builder()
+                    .productId(product.getId())
+                    .totalQuantity(vo.totalQuantity())
+                    .rank(i + 1)
+                    .build();
+
+            productRanks.add(rank);
+        }
+
+        productRankService.save(productRanks);
     }
 
 }

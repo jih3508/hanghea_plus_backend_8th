@@ -44,8 +44,8 @@ class UserCouponTest {
 
 
         UserCoupon userCoupon = UserCoupon.builder()
-                .user(user)
-                .coupon(coupon)
+                .userId(user.getId())
+                .couponId(coupon.getId())
                 .isUsed(true)
                 .build();
 

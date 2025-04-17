@@ -96,7 +96,7 @@ class OrderServiceIntegrationTest extends IntegrationTest {
 
         assertThat(result).isNotNull();
         assertThat(result.size()).isEqualTo(3);
-        
+
 
     }
 

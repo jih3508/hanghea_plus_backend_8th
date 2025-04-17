@@ -2,6 +2,7 @@ package kr.hhplus.be.server.application.product;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.product.model.DomainProduct;
+import kr.hhplus.be.server.domain.product.model.DomainProductRank;
 import kr.hhplus.be.server.domain.product.model.DomainProductStock;
 import kr.hhplus.be.server.infrastructure.product.entity.Product;
 import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
@@ -124,34 +125,31 @@ class ProductFacadeTest {
                 .name("상품3")
                 .build();
 
-        ProductRank rank1 = ProductRank.builder()
+        DomainProductRank rank1 = DomainProductRank.builder()
                 .id(1L)
-                .rankDate(LocalDate.now())
-                .product(product1)
+                .productId(product1.getId())
                 .rank(1)
                 .totalQuantity(100)
                 .build();
 
 
-        ProductRank rank2 = ProductRank.builder()
+        DomainProductRank rank2 = DomainProductRank.builder()
                 .id(2L)
-                .rankDate(LocalDate.now())
-                .product(product2)
+                .productId(product2.getId())
                 .rank(2)
                 .totalQuantity(70)
                 .build();
 
 
-        ProductRank rank3 = ProductRank.builder()
+        DomainProductRank rank3 = DomainProductRank.builder()
                 .id(2L)
-                .rankDate(LocalDate.now())
-                .product(product3)
+                .productId(product3.getId())
                 .rank(3)
                 .totalQuantity(50)
                 .build();
 
 
-        List<ProductRank> ranks = List.of(rank1, rank2, rank3);
+        List<DomainProductRank> ranks = List.of(rank1, rank2, rank3);
 
         //when
         when(rankService.todayProductRank()).thenReturn(ranks);

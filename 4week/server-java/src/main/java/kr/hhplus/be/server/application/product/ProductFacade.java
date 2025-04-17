@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.product;
 
 import kr.hhplus.be.server.domain.product.model.DomainProduct;
+import kr.hhplus.be.server.domain.product.model.DomainProductRank;
 import kr.hhplus.be.server.domain.product.model.DomainProductStock;
 import kr.hhplus.be.server.infrastructure.product.entity.Product;
 import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
@@ -46,7 +47,7 @@ public class ProductFacade {
 
     public List<ProductRankCommand> todayProductRank(){
 
-        List<ProductRank> rank =  rankService.todayProductRank();
+        List<DomainProductRank> rank =  rankService.todayProductRank();
         List<ProductRankCommand> command = rank.stream().map(ProductRankCommand::from).toList();
         return command;
 
