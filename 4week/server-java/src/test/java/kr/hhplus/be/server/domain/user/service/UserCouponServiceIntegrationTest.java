@@ -188,5 +188,4 @@ class UserCouponServiceIntegrationTest extends IntegrationTest {
         assertThat(result).isNotEmpty();
     }
 
-
 }

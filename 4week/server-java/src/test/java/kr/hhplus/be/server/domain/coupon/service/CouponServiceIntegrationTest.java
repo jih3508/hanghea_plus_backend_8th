@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DisplayName("포인트 서비스 통합 테스트")
+@DisplayName("쿠폰 서비스 통합 테스트")
 class CouponServiceIntegrationTest extends IntegrationTest {
 
     private static final Logger log = LoggerFactory.getLogger(CouponServiceIntegrationTest.class);

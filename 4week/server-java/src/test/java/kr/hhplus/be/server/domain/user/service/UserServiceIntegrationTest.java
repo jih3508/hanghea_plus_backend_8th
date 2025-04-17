@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.domain.user.service;
 
-import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.user.model.CreateUser;
 import kr.hhplus.be.server.domain.user.model.DomainUser;
@@ -15,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@Transactional
+
 public class UserServiceIntegrationTest  extends IntegrationTest {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceIntegrationTest.class);
@@ -59,6 +58,5 @@ public class UserServiceIntegrationTest  extends IntegrationTest {
         assertThat(result.getUserId()).isEqualTo("test");
 
     }
-
 
 }
