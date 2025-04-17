@@ -1,7 +1,8 @@
-package kr.hhplus.be.server.domain.point.entity;
+package kr.hhplus.be.server.infrastructure.point.entity;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.domain.point.model.DomainPoint;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import lombok.*;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import java.math.BigDecimal;
 
 @Entity
+@Table(name = "point")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
@@ -34,6 +36,10 @@ public class Point {
         this.point = point;
     }
 
+    public void setPoint(BigDecimal point) {
+        this.point = point;
+    }
+
     public static Point create(User user) {
         return Point.builder()
                 .user(user)
@@ -56,6 +62,14 @@ public class Point {
         }
 
         this.point = this.point.subtract(amount);
+    }
+
+    public DomainPoint toDomain(){
+        return DomainPoint.builder()
+                .id(this.id)
+                .userId(this.user.getId())
+                .point(this.point)
+                .build();
     }
 
 }

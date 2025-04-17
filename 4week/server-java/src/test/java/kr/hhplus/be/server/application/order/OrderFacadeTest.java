@@ -8,6 +8,7 @@ import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
+import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
@@ -70,10 +71,10 @@ class OrderFacadeTest {
         OrderCommand.OrderItem item3 = mock(OrderCommand.OrderItem.class);
 
         command.setItems(List.of(item1,item2,item3));
-        User user = mock(User.class);
+        DomainUser user = mock(DomainUser.class);
 
         Order order = Order.builder().id(1L)
-                .user(user)
+                //.user(user)
                 .totalPrice(new BigDecimal(1_000_000))
                 .build();
 
@@ -107,9 +108,9 @@ class OrderFacadeTest {
         OrderCommand.OrderItem item3 = mock(OrderCommand.OrderItem.class);
 
         command.setItems(List.of(item1,item2,item3));
-        User user = mock(User.class);
+        DomainUser user = mock(DomainUser.class);
         Order order = Order.builder().id(1L)
-                .user(user)
+                //.user(user)
                 .totalPrice(new BigDecimal(1_000_000))
                 .build();
 
@@ -138,9 +139,9 @@ class OrderFacadeTest {
         OrderCommand.OrderItem item3 = mock(OrderCommand.OrderItem.class);
 
         command.setItems(List.of(item1,item2,item3));
-        User user = mock(User.class);
+        DomainUser user = mock(DomainUser.class);
         Order order = Order.builder().id(1L)
-                .user(user)
+                //.user(user)
                 .totalPrice(new BigDecimal(0))
                 .build();
 

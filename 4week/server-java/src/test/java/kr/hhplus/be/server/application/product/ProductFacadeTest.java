@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.application.product;
 
-import kr.hhplus.be.server.application.point.ProductRankCommand;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.product.entity.Product;
 import kr.hhplus.be.server.domain.product.entity.ProductCategory;
@@ -20,8 +19,6 @@ import org.springframework.http.HttpStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;

@@ -1,6 +1,7 @@
-package kr.hhplus.be.server.domain.point.entity;
+package kr.hhplus.be.server.infrastructure.point.entity;
 
 import jakarta.persistence.*;
+import kr.hhplus.be.server.domain.point.model.CreatePointHistory;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "point_history")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class PointHistory {
@@ -26,7 +28,7 @@ public class PointHistory {
 
 
     @Enumerated(EnumType.STRING)
-    PointTransactionType type;
+    private PointTransactionType type;
 
     @Column(name = "amount", precision = 10, scale = 2)
     private BigDecimal amount;
@@ -41,6 +43,7 @@ public class PointHistory {
         this.user = user;
         this.type = type;
         this.amount = amount;
+        this.createdDateTime = LocalDateTime.now();
     }
 
     public static PointHistory create(User user, PointTransactionType type, BigDecimal amount) {
@@ -48,6 +51,14 @@ public class PointHistory {
                 .user(user)
                 .type(type)
                 .amount(amount)
+                .build();
+    }
+
+    public static PointHistory create(CreatePointHistory createVo, User user){
+        return PointHistory.builder()
+                .user(user)
+                .type(createVo.getType())
+                .amount(createVo.getAmount())
                 .build();
     }
 

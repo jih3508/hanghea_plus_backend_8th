@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.api.product.response;
 
-import kr.hhplus.be.server.application.point.ProductRankCommand;
+import kr.hhplus.be.server.application.product.ProductRankCommand;
 import lombok.*;
 
 @Getter

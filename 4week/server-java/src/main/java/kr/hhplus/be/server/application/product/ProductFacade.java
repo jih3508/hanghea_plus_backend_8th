@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.application.product;
 
-import kr.hhplus.be.server.application.point.ProductRankCommand;
 import kr.hhplus.be.server.domain.product.entity.Product;
 import kr.hhplus.be.server.domain.product.entity.ProductRank;
 import kr.hhplus.be.server.domain.product.entity.ProductStock;
@@ -12,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor

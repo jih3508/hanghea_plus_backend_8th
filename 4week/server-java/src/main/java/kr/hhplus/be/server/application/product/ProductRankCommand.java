@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.point;
+package kr.hhplus.be.server.application.product;
 
 import kr.hhplus.be.server.domain.product.entity.ProductRank;
 import lombok.*;

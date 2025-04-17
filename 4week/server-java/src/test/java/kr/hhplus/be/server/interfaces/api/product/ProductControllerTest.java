@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.api.product;
 
-import kr.hhplus.be.server.application.point.ProductRankCommand;
+import kr.hhplus.be.server.application.product.ProductRankCommand;
 import kr.hhplus.be.server.application.product.ProductFacade;
 import kr.hhplus.be.server.application.product.ProductInfoCommand;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
