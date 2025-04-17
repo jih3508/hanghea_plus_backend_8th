@@ -2,14 +2,15 @@ package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
-import kr.hhplus.be.server.domain.order.entity.Order;
+import kr.hhplus.be.server.domain.order.model.CreateOrder;
+import kr.hhplus.be.server.domain.order.model.DomainOrder;
+import kr.hhplus.be.server.infrastructure.order.entity.Order;
 import kr.hhplus.be.server.domain.order.service.OrderService;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
 import kr.hhplus.be.server.domain.user.model.DomainUser;
-import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -73,14 +74,14 @@ class OrderFacadeTest {
         command.setItems(List.of(item1,item2,item3));
         DomainUser user = mock(DomainUser.class);
 
-        Order order = Order.builder().id(1L)
-                //.user(user)
+        DomainOrder order = DomainOrder.builder().id(1L)
+                .userId(anyLong())
                 .totalPrice(new BigDecimal(1_000_000))
                 .build();
 
         //when
         when(userService.findById(any())).thenReturn(user);
-        when(orderService.save(any(Order.class))).thenReturn(order);
+        when(orderService.create(any(CreateOrder.class))).thenReturn(order);
         when(pointService.use(anyLong(), any())).thenThrow(new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "잔액 부족!!!!"));
 
 
@@ -88,9 +89,8 @@ class OrderFacadeTest {
         assertThatThrownBy(() -> facade.order(command))
                 .isInstanceOf(ApiExceptionResponse.class)
                 .hasMessage("잔액 부족!!!!");
-        verify(orderService, times(1)).createOrderNumber();
-        verify(orderService, times(1)).save(any(Order.class));
-        verify(orderService, times(1)).save(any(Order.class), anyList());
+        verify(facade, times(1)).createOrderNumber();
+        verify(orderService, times(1)).create(any(CreateOrder.class));
         verify(pointService, times(1)).use(any(), any());
         verify(externalTransmissionService, never()).sendOrderData();
 
@@ -109,20 +109,19 @@ class OrderFacadeTest {
 
         command.setItems(List.of(item1,item2,item3));
         DomainUser user = mock(DomainUser.class);
-        Order order = Order.builder().id(1L)
-                //.user(user)
+        DomainOrder order = DomainOrder.builder().id(1L)
+                .userId(anyLong())
                 .totalPrice(new BigDecimal(1_000_000))
                 .build();
 
         //when
         when(userService.findById(any())).thenReturn(user);
-        when(orderService.save(any(Order.class))).thenReturn(order);
+        when(orderService.create(any(CreateOrder.class))).thenReturn(order);
         facade.order(command);
 
         // then
-        verify(orderService, times(1)).createOrderNumber();
-        verify(orderService, times(1)).save(any(Order.class));
-        verify(orderService, times(1)).save(any(Order.class), anyList());
+        verify(facade, times(1)).createOrderNumber();
+        verify(orderService, times(1)).create(any(CreateOrder.class));
         verify(pointService, times(1)).use(any(), any());
         verify(pointHistoryService, times(1)).useHistory(any(), any());
         verify(externalTransmissionService, times(1)).sendOrderData();
@@ -140,20 +139,19 @@ class OrderFacadeTest {
 
         command.setItems(List.of(item1,item2,item3));
         DomainUser user = mock(DomainUser.class);
-        Order order = Order.builder().id(1L)
-                //.user(user)
+        DomainOrder order = DomainOrder.builder().id(1L)
+                .userId(anyLong())
                 .totalPrice(new BigDecimal(0))
                 .build();
 
         //when
         when(userService.findById(any())).thenReturn(user);
-        when(orderService.save(any(Order.class))).thenReturn(order);
+        when(orderService.create(any(CreateOrder.class))).thenReturn(order);
         facade.order(command);
 
         // then
-        verify(orderService, times(1)).createOrderNumber();
-        verify(orderService, times(1)).save(any(Order.class));
-        verify(orderService, times(1)).save(any(Order.class), anyList());
+        verify(facade, times(1)).createOrderNumber();
+        verify(orderService, times(1)).create(any(CreateOrder.class));
         verify(pointService, never()).use(any(), any());
         verify(pointHistoryService, never()).useHistory(any(), any());
         verify(externalTransmissionService, times(1)).sendOrderData();

@@ -1,6 +1,8 @@
-package kr.hhplus.be.server.domain.order.entity;
+package kr.hhplus.be.server.infrastructure.order.entity;
 
 import jakarta.persistence.*;
+import kr.hhplus.be.server.domain.order.model.CreateOrder;
+import kr.hhplus.be.server.domain.order.model.DomainOrder;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,9 +21,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
     @Column(name = "user_id")
-    private User user;
+    private Long userId;
 
     @Column(name = "order_numbe")
     private String orderNumber;
@@ -41,11 +42,29 @@ public class Order {
     private LocalDateTime updateDateTime; // 수정 일시
 
     @Builder
-    public Order(Long id, User user, String orderNumber, BigDecimal totalPrice, BigDecimal discountPrice) {
+    public Order(Long id, Long userId, String orderNumber, BigDecimal totalPrice, BigDecimal discountPrice) {
         this.id = id;
-        this.user = user;
+        this.userId = userId;
         this.orderNumber = orderNumber;
         this.totalPrice = totalPrice;
         this.discountPrice = discountPrice;
+    }
+
+    public static Order create(CreateOrder createOrder) {
+        return Order.builder()
+                .userId(createOrder.getUserId())
+                .orderNumber(createOrder.getOrderNumber())
+                .totalPrice(createOrder.getTotalPrice())
+                .discountPrice(createOrder.getDiscountPrice())
+                .build();
+    }
+
+    public DomainOrder toDomain() {
+        return DomainOrder.builder()
+                .id(this.id)
+                .orderNumber(this.orderNumber)
+                .totalPrice(this.totalPrice)
+                .discountPrice(this.discountPrice)
+                .build();
     }
 }

@@ -2,10 +2,15 @@ package kr.hhplus.be.server.application.order;
 
 import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.domain.order.model.CreateOrder;
+import kr.hhplus.be.server.domain.order.model.DomainOrder;
+import kr.hhplus.be.server.domain.product.model.DomainProduct;
+import kr.hhplus.be.server.domain.product.model.DomainProductStock;
+import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
 import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
-import kr.hhplus.be.server.domain.order.entity.Order;
-import kr.hhplus.be.server.domain.order.entity.OrderItem;
+import kr.hhplus.be.server.infrastructure.order.entity.Order;
+import kr.hhplus.be.server.infrastructure.order.entity.OrderItem;
 import kr.hhplus.be.server.domain.order.service.OrderService;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
@@ -21,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -57,22 +63,25 @@ public class OrderFacade {
         List<OrderItem> items = new LinkedList<>();
 
         BigDecimal totalPrice = BigDecimal.ZERO;
+        CreateOrder createOrder = new CreateOrder(command.getUserId(), createOrderNumber());
 
         for(OrderCommand.OrderItem item : command.getItems()){
-            OrderItem orderItem = productProcess(command.getUserId(), item);
-            totalPrice.add(orderItem.getTotalPrice());
-            items.add(orderItem);
+
+            DomainProduct product = productService.getProduct(item.getProductId());
+            productStockService.delivering(product.getId(), item.getQuantity());
+
+
+            DomainUserCoupon userCoupon = null;
+            if(item.getCouponId() != null){
+                userCoupon = userCouponService.getUseCoupon(command.getUserId(), item.getProductId());
+            }
+            createOrder.addOrderItem(product, userCoupon, item.getQuantity());
+
         }
 
-        Order order = Order.builder()
-                .user(null)
-                .orderNumber(service.createOrderNumber())
-                .totalPrice(totalPrice)
-                .discountPrice(totalPrice)
-                .build();
+        DomainOrder order = orderService.create(createOrder);
 
-        order = orderService.save(order);
-        orderService.save(order, items);
+
 
         // 결제 처리
         if(order.getTotalPrice().compareTo(totalPrice) > 0){
@@ -85,32 +94,14 @@ public class OrderFacade {
     }
 
 
+
     /*
-     * method: productProcess
-     * description: 상품 처리및 계산
+     * method: createOrderNumber
+     * description: 주문 번호 생성
      */
-    private OrderItem productProcess(Long userId , OrderCommand.OrderItem item){
-        Product product = productService.getProduct(item.getProductId());
-        productStockService.delivering(item.getProductId(), item.getQuantity());
-        BigDecimal totalPrice = product.getPrice().multiply(new BigDecimal(item.getQuantity()));
-        // 쿠폰처리
-        Coupon coupon = null;
-        if(item.getCouponId() != null){
-            coupon = userCouponService.getUseCoupon(userId, item.getCouponId());
-            if(coupon.isExpired()){
-                throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "쿠폰 기간 만료 되었습니다.");
-            }
-            totalPrice = coupon.getDiscountPrice(totalPrice);
-        }
-
-
-        return OrderItem.builder()
-                .product(product)
-                .quantity(item.getQuantity())
-                .totalPrice(totalPrice)
-                .coupon(coupon)
-                .build();
+    public String createOrderNumber(){
+        LocalDateTime now = LocalDateTime.now();
+        return String.format("{0}{1}{2}%08d", now.getYear(), now.getMonth(), now.getDayOfMonth(), (int)(Math.random() * 1_000_000_000) + 1);
     }
-
 
 }

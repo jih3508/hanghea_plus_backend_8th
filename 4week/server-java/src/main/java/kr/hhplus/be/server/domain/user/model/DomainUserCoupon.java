@@ -47,6 +47,21 @@ public class DomainUserCoupon {
         this.isUsed = false;
     }
 
+    public BigDecimal getDiscountPrice(BigDecimal price) {
+        if(this.type.equals(CouponType.FLAT)){
+            // 고정 금액 할인
+            BigDecimal discounted = price.subtract(this.discountPrice);
+            return discounted.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : discounted;
+        }else if (this.type.equals(CouponType.RATE)) {
+            // 퍼센트 할인
+            BigDecimal discount = price.multiply(BigDecimal.valueOf(this.rate)).divide(BigDecimal.valueOf(100));
+            BigDecimal discounted = price.subtract(discount);
+            return discounted.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : discounted;
+        }
+
+        return price;
+    }
+
     public static DomainUserCoupon of(UserCoupon userCoupon, Coupon coupon) {
         return DomainUserCoupon.builder()
                 .id(userCoupon.getId())
