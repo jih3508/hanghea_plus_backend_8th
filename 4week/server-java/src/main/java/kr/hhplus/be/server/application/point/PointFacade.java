@@ -46,6 +46,4 @@ public class PointFacade {
         return point.getPoint();
     }
 
-
-
 }
