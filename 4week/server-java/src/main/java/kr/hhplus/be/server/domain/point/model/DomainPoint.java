@@ -23,6 +23,9 @@ public class DomainPoint {
 
     public void charge(BigDecimal amount) {
         this.point = this.point.add(amount);
+        if(point.compareTo(amount) <= 0){
+            throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "충전 포인트 금액이 1원 이상이여야 합니다.");
+        }
 
         if(point.compareTo(MAX_POINT) > 0) {
             throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "충전후 포인트가 한도 초과 되었습니다.");
@@ -32,7 +35,7 @@ public class DomainPoint {
 
     public void use(BigDecimal amount) {
         if(point.compareTo(amount) < 0) {
-            throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "잔액 부족!!!!");
+            throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "잔액 부족이 부족합니다. 충전후 결제 요청 드립니다.");
         }
 
         this.point = this.point.subtract(amount);

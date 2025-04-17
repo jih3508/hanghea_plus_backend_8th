@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.point.model;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,6 +41,24 @@ class DomainPointTest {
     }
 
     @Test
+    @DisplayName("잔액 충전 포인트가 0원 이하일때 실패")
+    void 충전_금액_0이하(){
+        // given
+        DomainPoint point = DomainPoint.builder()
+                .id(1L)
+                .userId(1L)
+                .point(MAX_POINT)
+                .build();
+
+        BigDecimal chargePoint = new BigDecimal(-100000);
+
+        assertThatThrownBy(() -> point.charge(chargePoint))
+                .isInstanceOf(ApiExceptionResponse.class)
+                .hasMessage("충전 포인트 금액이 1원 이상이여야 합니다.");
+
+    }
+
+    @Test
     @DisplayName("잔액 정상적인 충전 테스트")
     void 충전(){
         // given
@@ -73,7 +92,7 @@ class DomainPointTest {
         // when
         assertThatThrownBy(() -> point.use(usePoint))
                 .isInstanceOf(ApiExceptionResponse.class)
-                .hasMessage("잔액 부족!!!!");
+                .hasMessage("잔액 부족이 부족합니다. 충전후 결제 요청 드립니다.");
 
     }
 
@@ -94,4 +113,6 @@ class DomainPointTest {
         log.info(new BigDecimal(1_000_000).subtract(usePoint).toString());
         assertThat(point.getPoint()).isEqualTo(new BigDecimal(1_000_000).subtract(usePoint));
     }
+
+
 }

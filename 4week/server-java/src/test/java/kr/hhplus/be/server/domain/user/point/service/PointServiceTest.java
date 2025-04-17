@@ -138,17 +138,17 @@ class PointServiceTest {
 
         BigDecimal amount = new BigDecimal(500_000L);
 
-        Point expected = Point.builder()
+        DomainPoint expected = DomainPoint.builder()
                 .id(1L)
-                .user(user)
+                .userId(1L)
                 .point(new BigDecimal(100_000).add(amount))
                 .build();
 
         // when
         when(repository.findByUserId(1l)).thenReturn(Optional.of(point));
-       // when(repository.save(any(Point.class))).thenReturn(expected);
+        when(repository.update(any(UpdatePoint.class))).thenReturn(expected);
 
-        Point result = service.charge(1l, amount);
+        DomainPoint result = service.charge(1l, amount);
 
         log.info("result={}", result);
 
@@ -182,7 +182,7 @@ class PointServiceTest {
 
         assertThatThrownBy(() -> service.use(1l, amount))
         .isInstanceOf(ApiExceptionResponse.class)
-                .hasMessage("잔액 부족!!!!");
+                .hasMessage("잔액 부족이 부족합니다. 충전후 결제 요청 드립니다.");
 
         verify(repository, never()).update(any());
     }
@@ -215,7 +215,7 @@ class PointServiceTest {
                         .build()
         );
 
-        Point result = service.use(1l, amount);
+        DomainPoint result = service.use(1l, amount);
 
         assertThat(result.getPoint()).isEqualTo(new BigDecimal(50_000L));
         verify(repository, times(1)).update(any(UpdatePoint.class));
