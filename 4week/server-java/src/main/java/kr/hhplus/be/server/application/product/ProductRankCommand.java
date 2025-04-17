@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.application.product;
 
-import kr.hhplus.be.server.domain.product.entity.ProductRank;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
 import lombok.*;
 
 @Getter

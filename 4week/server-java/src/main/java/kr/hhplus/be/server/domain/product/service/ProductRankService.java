@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.product.service;
 
-import kr.hhplus.be.server.domain.product.entity.ProductRank;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
 import kr.hhplus.be.server.domain.product.repository.ProductRankRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

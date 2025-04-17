@@ -2,7 +2,7 @@ package kr.hhplus.be.server.application.order.scheduler;
 
 import kr.hhplus.be.server.domain.order.service.OrderService;
 import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
-import kr.hhplus.be.server.domain.product.entity.Product;
+import kr.hhplus.be.server.infrastructure.product.entity.Product;
 import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

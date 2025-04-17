@@ -1,35 +1,30 @@
-package kr.hhplus.be.server.domain.product.entity;
+package kr.hhplus.be.server.domain.product.model;
 
-
-import jakarta.persistence.*;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 
-@Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
-@ToString
-public class ProductStock {
+import java.math.BigDecimal;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@Builder
+public class DomainProductStock {
+
     private Long id;
 
-    @ManyToOne
-    @Column(name = "product_id", unique = true)
-    private Product product;
-
+    private Long productId;
 
     private  Integer quantity;
 
+    private String name; // 상품명
 
-    @Builder
-    public ProductStock(Long id, Product product, Integer quantity) {
-        this.id = id;
-        this.product = product;
-        this.quantity = quantity;
-    }
+    private BigDecimal price; // 가격
+
+    private ProductCategory category;
 
     /*
      * method: isStock
@@ -58,4 +53,5 @@ public class ProductStock {
 
         this.quantity -= quantity;
     }
+
 }

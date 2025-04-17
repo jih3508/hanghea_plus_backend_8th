@@ -4,7 +4,7 @@ import kr.hhplus.be.server.application.product.ProductRankCommand;
 import kr.hhplus.be.server.application.product.ProductFacade;
 import kr.hhplus.be.server.application.product.ProductInfoCommand;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.product.entity.ProductCategory;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import kr.hhplus.be.server.interfaces.api.common.ControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

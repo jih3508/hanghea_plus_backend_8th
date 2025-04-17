@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.product.repository;
 
-import kr.hhplus.be.server.domain.product.entity.ProductRank;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

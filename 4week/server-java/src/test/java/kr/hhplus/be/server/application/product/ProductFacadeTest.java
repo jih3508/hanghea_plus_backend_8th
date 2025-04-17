@@ -1,10 +1,12 @@
 package kr.hhplus.be.server.application.product;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.product.entity.Product;
-import kr.hhplus.be.server.domain.product.entity.ProductCategory;
-import kr.hhplus.be.server.domain.product.entity.ProductRank;
-import kr.hhplus.be.server.domain.product.entity.ProductStock;
+import kr.hhplus.be.server.domain.product.model.DomainProduct;
+import kr.hhplus.be.server.domain.product.model.DomainProductStock;
+import kr.hhplus.be.server.infrastructure.product.entity.Product;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductStock;
 import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
@@ -59,16 +61,19 @@ class ProductFacadeTest {
     @DisplayName("조회시 삳품에 대한 데이터가 있을 경우")
     void 상품_데이터O(){
         // given
-        Product product = Product.builder()
+        DomainProduct product = DomainProduct.builder()
                 .id(1L)
                 .name("노트북")
                 .price(new BigDecimal(2_000_000))
                 .category(ProductCategory.ELECTRONIC_DEVICES)
                 .build();
 
-        ProductStock stock = ProductStock.builder()
+        DomainProductStock stock = DomainProductStock.builder()
                 .id(1L)
-                .product(product)
+                .productId(1L)
+                .name("노트북")
+                .price(new BigDecimal(2_000_000))
+                .category(ProductCategory.ELECTRONIC_DEVICES)
                 .quantity(10)
                 .build();
 
