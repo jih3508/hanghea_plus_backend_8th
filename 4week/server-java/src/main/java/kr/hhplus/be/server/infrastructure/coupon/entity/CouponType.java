@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.coupon.entity;
+package kr.hhplus.be.server.infrastructure.coupon.entity;
 
 
 public enum CouponType {

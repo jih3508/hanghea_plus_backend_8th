@@ -1,8 +1,12 @@
 package kr.hhplus.be.server.infrastructure.user.entity;
 
 import jakarta.persistence.*;
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
+import kr.hhplus.be.server.domain.user.model.CreateUserCoupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -14,26 +18,36 @@ public class UserCoupon {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
     @Column(name = "user_id")
-    private User user;
+    private Long userId;
 
-    @ManyToOne
     @Column(name = "coupon_id")
-    private Coupon coupon;
+    private Long couponId;
 
     @Column(name = "is_used")
     private Boolean isUsed;
 
+    @Column(name = "issued_date_time")
+    @CreatedDate
+    private LocalDateTime issuedDateTime;
+
     @Builder
-    public UserCoupon(User user, Coupon coupon, Boolean isUsed) {
-        this.user = user;
-        this.coupon = coupon;
+    public UserCoupon(Long userId, Long couponId,  Boolean isUsed) {
+        this.userId = userId;
+        this.couponId = couponId;
+        this.isUsed = isUsed;
+    }
+
+    public void setIsUsed(Boolean isUsed) {
         this.isUsed = isUsed;
     }
 
     public void usedCoupon() {
         this.isUsed = false;
+    }
+
+    public static UserCoupon create(CreateUserCoupon createUserCoupon) {
+        return new UserCoupon(createUserCoupon.getUserId(), createUserCoupon.getCouponId(), true);
     }
 
 }

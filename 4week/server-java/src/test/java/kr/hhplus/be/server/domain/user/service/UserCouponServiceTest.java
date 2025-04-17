@@ -1,8 +1,9 @@
 package kr.hhplus.be.server.domain.user.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
-import kr.hhplus.be.server.domain.coupon.entity.CouponType;
+import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
 import kr.hhplus.be.server.domain.user.repository.UserCouponRepository;
@@ -73,15 +74,21 @@ class UserCouponServiceTest {
                 .build();
 
 
-        UserCoupon expected = UserCoupon.builder()
-                .user(user)
-                .coupon(coupon)
+        DomainUserCoupon expected = DomainUserCoupon.builder()
+                .id(1L)
+                .userId(1L)
+                .couponId(coupon.getId())
+                .couponNumber(UUID.randomUUID().toString())
+                .type(CouponType.FLAT)
+                .discountPrice(new BigDecimal(5_000))
+                .startDateTime(LocalDateTime.of(2025, 1, 30, 0, 0))
+                .endDateTime(LocalDateTime.of(2025, 3, 30, 12, 12))
                 .isUsed(true)
                 .build();
 
         when(repository.findByUserIdAndCouponId(1L, 1L)).thenReturn(Optional.of(expected));
 
-        Coupon result = service.getUseCoupon(1L, 1L);
+        DomainUserCoupon result = service.getUseCoupon(1L, 1L);
 
         assertThat(result).isEqualTo(coupon);
     }

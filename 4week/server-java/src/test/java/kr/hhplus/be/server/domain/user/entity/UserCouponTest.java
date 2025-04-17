@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.user.entity;
 
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
-import kr.hhplus.be.server.domain.coupon.entity.CouponType;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
 import org.junit.jupiter.api.DisplayName;

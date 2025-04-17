@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.coupon;
 
-import kr.hhplus.be.server.domain.coupon.entity.CouponType;
+import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
 import lombok.*;
 
@@ -25,13 +26,13 @@ public class CouponMeCommand {
 
     private Boolean isUsed;
 
-    public static CouponMeCommand toCommand(UserCoupon userCoupon) {
+    public static CouponMeCommand toCommand(DomainUserCoupon userCoupon) {
         return CouponMeCommand.builder()
-                .couponId(userCoupon.getCoupon().getId())
-                .couponNumber(userCoupon.getCoupon().getCouponNumber())
-                .type(userCoupon.getCoupon().getType())
-                .discountPrice(userCoupon.getCoupon().getDiscountPrice())
-                .rate(userCoupon.getCoupon().getRate())
+                .couponId(userCoupon.getCouponId())
+                .couponNumber(userCoupon.getCouponNumber())
+                .type(userCoupon.getType())
+                .discountPrice(userCoupon.getDiscountPrice())
+                .rate(userCoupon.getRate())
                 .isUsed(userCoupon.getIsUsed())
                 .build();
     }

@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.order.entity;
 
 import jakarta.persistence.*;
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import kr.hhplus.be.server.infrastructure.product.entity.Product;
 import lombok.*;
 

@@ -2,7 +2,7 @@ package kr.hhplus.be.server.application.order;
 
 import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.entity.Order;
 import kr.hhplus.be.server.domain.order.entity.OrderItem;

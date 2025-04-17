@@ -1,63 +1,39 @@
-package kr.hhplus.be.server.domain.coupon.entity;
+package kr.hhplus.be.server.domain.coupon.model;
 
-import jakarta.persistence.*;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
+import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Setter
 @ToString
-public class Coupon {
+@AllArgsConstructor
+@Builder
+public class DomainCoupon {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String couponNumber;
 
     private Integer quantity;
 
-    @Enumerated(EnumType.STRING)
     private CouponType type;
 
     private Integer rate;
 
-    @Column(name = "discount_price", precision = 10, scale = 2)
     private BigDecimal discountPrice;
 
-    @Column(name = "start_date_time")
     private LocalDateTime startDateTime;
 
-    @Column(name = "end_date_time")
     private LocalDateTime endDateTime;
-
-    @CreatedDate
-    @Column(name = "create_date_time", updatable = false)
-    private LocalDateTime createDateTime; // 생성 일시
-
-    @LastModifiedDate
-    @Column(name = "update_date_time")
-    private LocalDateTime updateDateTime; // 수정 일시
-
-    @Builder
-    public Coupon(Long id, String couponNumber, Integer quantity, CouponType type, Integer rate, BigDecimal discountPrice, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        this.id = id;
-        this.couponNumber = couponNumber;
-        this.quantity = quantity;
-        this.type = type;
-        this.rate = rate;
-        this.discountPrice = discountPrice;
-        this.startDateTime = startDateTime;
-        this.endDateTime = endDateTime;
-        this.createDateTime = LocalDateTime.now();
-    }
 
 
     public Boolean isExpired() {
@@ -92,4 +68,15 @@ public class Coupon {
         return price;
     }
 
+
+
+
+
+
+
+
+
+
+
 }
+

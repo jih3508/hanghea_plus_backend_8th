@@ -1,14 +1,17 @@
 package kr.hhplus.be.server.domain.coupon.repository;
 
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
-import org.springframework.stereotype.Repository;
+import kr.hhplus.be.server.domain.coupon.model.CreateCoupon;
+import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
+import kr.hhplus.be.server.domain.coupon.model.UpdateCoupon;
 
 import java.util.Optional;
 
-@Repository
 public interface CouponRepository {
 
-    Optional<Coupon> findById(long id);
+    Optional<DomainCoupon> findById(long id);
 
-    Coupon save(Coupon coupon);
+    DomainCoupon create(CreateCoupon coupon);
+
+    DomainCoupon update(UpdateCoupon coupon);
+
 }
