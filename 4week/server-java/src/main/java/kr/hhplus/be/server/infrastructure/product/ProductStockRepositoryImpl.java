@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class ProductStockRepositoryImpl extends ProductStockRepository {
+public class ProductStockRepositoryImpl implements ProductStockRepository {
 
     private final ProductStockJpaRepository repository;
 
