@@ -3,8 +3,6 @@ package kr.hhplus.be.server.application.order.scheduler;
 import kr.hhplus.be.server.domain.order.service.OrderService;
 import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.domain.product.model.DomainProduct;
-import kr.hhplus.be.server.domain.product.model.DomainProductRank;
-import kr.hhplus.be.server.infrastructure.product.entity.Product;
 import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.interfaces.api.order.scheduler.OrderScheduler;
@@ -19,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

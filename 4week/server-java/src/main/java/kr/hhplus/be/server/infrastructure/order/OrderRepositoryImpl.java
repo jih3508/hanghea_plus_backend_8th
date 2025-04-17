@@ -8,6 +8,8 @@ import kr.hhplus.be.server.infrastructure.order.entity.OrderItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
@@ -26,5 +28,10 @@ public class OrderRepositoryImpl implements OrderRepository {
         });
 
         return order;
+    }
+
+    @Override
+    public List<DomainOrder> findByUserId(Long userId) {
+        return repository.findAllByUserId(userId).stream().map(Order::toDomain);
     }
 }

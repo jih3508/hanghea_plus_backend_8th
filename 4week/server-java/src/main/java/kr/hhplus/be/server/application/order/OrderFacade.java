@@ -1,32 +1,25 @@
 package kr.hhplus.be.server.application.order;
 
 import jakarta.transaction.Transactional;
-import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
-import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
-import kr.hhplus.be.server.domain.product.model.CreateProductRank;
-import kr.hhplus.be.server.domain.product.model.DomainProduct;
-import kr.hhplus.be.server.domain.product.model.DomainProductStock;
-import kr.hhplus.be.server.domain.product.service.ProductRankService;
-import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
-import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
-import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
-import kr.hhplus.be.server.infrastructure.order.entity.Order;
-import kr.hhplus.be.server.infrastructure.order.entity.OrderItem;
 import kr.hhplus.be.server.domain.order.service.OrderService;
+import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
-import kr.hhplus.be.server.infrastructure.product.entity.Product;
+import kr.hhplus.be.server.domain.product.model.CreateProductRank;
+import kr.hhplus.be.server.domain.product.model.DomainProduct;
+import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
 import kr.hhplus.be.server.domain.user.model.DomainUser;
+import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
-import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
+import kr.hhplus.be.server.infrastructure.order.entity.OrderItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -52,8 +45,6 @@ public class OrderFacade {
     private final ProductStockService productStockService;
 
     private final UserCouponService userCouponService;
-
-    private final OrderService orderService;
 
     private final ExternalTransmissionService  externalTransmissionService;
 
@@ -85,7 +76,7 @@ public class OrderFacade {
 
         }
 
-        DomainOrder order = orderService.create(createOrder);
+        DomainOrder order = service.create(createOrder);
 
 
 
@@ -111,7 +102,7 @@ public class OrderFacade {
     }
 
     public void updateRank(){
-        List<OrderHistoryProductGroupVo> list = orderService.threeDaysOrderProductHistory();
+        List<OrderHistoryProductGroupVo> list = service.threeDaysOrderProductHistory();
         int size = list.size();
         List<CreateProductRank> productRanks = new LinkedList<>();
 
