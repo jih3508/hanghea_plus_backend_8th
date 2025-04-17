@@ -4,13 +4,11 @@ import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.product.model.DomainProduct;
 import kr.hhplus.be.server.domain.product.model.DomainProductRank;
 import kr.hhplus.be.server.domain.product.model.DomainProductStock;
-import kr.hhplus.be.server.infrastructure.product.entity.Product;
-import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
-import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
-import kr.hhplus.be.server.infrastructure.product.entity.ProductStock;
 import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
+import kr.hhplus.be.server.infrastructure.product.entity.Product;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,11 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

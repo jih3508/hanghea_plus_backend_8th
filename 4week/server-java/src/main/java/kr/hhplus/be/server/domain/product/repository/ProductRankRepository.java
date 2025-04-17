@@ -14,4 +14,6 @@ public interface ProductRankRepository {
     List<DomainProductRank> todayProductRank();
 
     List<DomainProductRank> findAllProductRank();
+
+    void delleteAll();
 }

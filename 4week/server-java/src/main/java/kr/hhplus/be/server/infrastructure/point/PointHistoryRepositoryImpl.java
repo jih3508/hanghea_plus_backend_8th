@@ -9,6 +9,7 @@ import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,5 +33,10 @@ public class PointHistoryRepositoryImpl implements PointHistoryRepository {
         return JpaRepository.findTopByOrderByCreateDateTimeDesc().map(PointHistory::toDomain)
                 .map(Optional::of)
                 .orElse(Optional.empty());
+    }
+
+    @Override
+    public List<DomainPointHistory> findByUserId(Long userId) {
+        return JpaRepository.findAlByUserId();
     }
 }
