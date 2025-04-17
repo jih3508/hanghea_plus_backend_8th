@@ -12,5 +12,5 @@ public interface UserRepository {
 
     Optional<DomainUser> findById(Long id);
 
-    User save(CreateUser user);
+    User create(CreateUser user);
 }

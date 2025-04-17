@@ -7,10 +7,14 @@ import kr.hhplus.be.server.domain.user.repository.UserCouponRepository;
 import kr.hhplus.be.server.infrastructure.coupon.CouponJpaRepository;
 import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
+@RequiredArgsConstructor
 public class UserCouponRepositoryImpl implements UserCouponRepository {
 
     private UserCouponJpaRepository repository;

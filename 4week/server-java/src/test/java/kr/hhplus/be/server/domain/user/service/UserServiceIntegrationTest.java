@@ -50,7 +50,7 @@ public class UserServiceIntegrationTest  extends IntegrationTest {
                 .id("test")
                 .build();
 
-        userRepository.save(user);
+        userRepository.create(user);
 
         // when
         DomainUser result  = userService.findById(id);

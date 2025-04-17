@@ -1,11 +1,7 @@
 package kr.hhplus.be.server.domain.coupon.model;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
-import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
-import kr.hhplus.be.server.infrastructure.user.entity.User;
-import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 

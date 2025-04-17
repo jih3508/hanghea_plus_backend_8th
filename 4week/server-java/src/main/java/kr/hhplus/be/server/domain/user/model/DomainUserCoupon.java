@@ -1,10 +1,12 @@
 package kr.hhplus.be.server.domain.user.model;
 
+import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
 import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,6 +41,9 @@ public class DomainUserCoupon {
     private LocalDateTime issuedDateTime;
 
     public void usedCoupon() {
+        if(!this.isUsed){
+            throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "이미 사용한 쿠폰 입니다.");
+        }
         this.isUsed = false;
     }
 

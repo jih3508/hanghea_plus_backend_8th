@@ -23,8 +23,7 @@ public class CouponService {
     public DomainCoupon issueCoupon(Long couponId) {
         DomainCoupon coupon = this.getCoupon(couponId);
         coupon.issueCoupon();
-        repository.update(new UpdateCoupon(coupon.getId(), coupon.getQuantity()));
-        return coupon;
+        return repository.update(new UpdateCoupon(coupon.getId(), coupon.getQuantity()));
     }
 
 }

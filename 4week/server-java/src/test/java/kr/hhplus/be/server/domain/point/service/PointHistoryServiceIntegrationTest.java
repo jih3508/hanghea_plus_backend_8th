@@ -2,7 +2,6 @@ package kr.hhplus.be.server.domain.point.service;
 
 import kr.hhplus.be.server.domain.point.model.DomainPointHistory;
 import kr.hhplus.be.server.domain.point.repository.PointHistoryRepository;
-import kr.hhplus.be.server.domain.point.repository.PointRepository;
 import kr.hhplus.be.server.domain.user.model.CreateUser;
 import kr.hhplus.be.server.domain.user.repository.UserRepository;
 import kr.hhplus.be.server.infrastructure.point.entity.PointTransactionType;
@@ -40,7 +39,7 @@ class PointHistoryServiceIntegrationTest  extends IntegrationTest {
                 .id("test1")
                 .build();
 
-        userRepository.save(user);
+        userRepository.create(user);
     }
 
     @Test

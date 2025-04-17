@@ -41,7 +41,7 @@ class PointServiceIntegrationTest extends IntegrationTest {
                 .id("test1")
                 .build();
 
-        User resultUser = userRepository.save(user);
+        User resultUser = userRepository.create(user);
         repository.create(resultUser.getId());
 
         user = CreateUser.builder()
@@ -49,7 +49,7 @@ class PointServiceIntegrationTest extends IntegrationTest {
                 .id("test2")
                 .build();
 
-        resultUser = userRepository.save(user);
+        resultUser = userRepository.create(user);
         DomainPoint point = repository.create(resultUser.getId());
         repository.update(UpdatePoint.builder()
                         .pointId(point.getId())
@@ -62,7 +62,7 @@ class PointServiceIntegrationTest extends IntegrationTest {
                 .id("test3")
                 .build();
 
-        resultUser = userRepository.save(user);
+        resultUser = userRepository.create(user);
         point = repository.create(resultUser.getId());
         repository.update(UpdatePoint.builder()
                 .pointId(point.getId())
