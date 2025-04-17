@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.infrastructure.order;
 
 import kr.hhplus.be.server.domain.order.model.CreateOrderProductHistory;
-import kr.hhplus.be.server.domain.order.model.DomainProductHistory;
+import kr.hhplus.be.server.domain.order.model.DomainOrderProductHistory;
 import kr.hhplus.be.server.domain.order.repository.OrderProductHistoryRepository;
 import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.infrastructure.order.entity.OrderProductHistory;
@@ -18,7 +18,7 @@ public class OrderHistoryRepositoryImpl implements OrderProductHistoryRepository
     private final OrderProductHistoryJpaRepository repository;
 
     @Override
-    public DomainProductHistory create(CreateOrderProductHistory create) {
+    public DomainOrderProductHistory create(CreateOrderProductHistory create) {
         return repository.save(OrderProductHistory.create(create)).toDomain();
     }
 
@@ -32,5 +32,11 @@ public class OrderHistoryRepositoryImpl implements OrderProductHistoryRepository
                 .withNano(0);
 
         return repository.findGroupByProductIdThreeDays(startDate);
+    }
+
+    @Override
+    public List<DomainOrderProductHistory> findByOrderId(Long orderId) {
+        return repository.findByOrderId(orderId)
+                .stream().map(OrderProductHistory::toDomain).toList();
     }
 }

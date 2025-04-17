@@ -2,8 +2,7 @@ package kr.hhplus.be.server.infrastructure.order.entity;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.order.model.CreateOrderProductHistory;
-import kr.hhplus.be.server.domain.order.model.DomainProductHistory;
-import kr.hhplus.be.server.infrastructure.product.entity.Product;
+import kr.hhplus.be.server.domain.order.model.DomainOrderProductHistory;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -49,8 +48,8 @@ public class OrderProductHistory {
 
     }
 
-    public DomainProductHistory toDomain(){
-        return DomainProductHistory.builder()
+    public DomainOrderProductHistory toDomain(){
+        return DomainOrderProductHistory.builder()
                 .id(this.id)
                 .orderId(this.orderId)
                 .productId(this.productId)

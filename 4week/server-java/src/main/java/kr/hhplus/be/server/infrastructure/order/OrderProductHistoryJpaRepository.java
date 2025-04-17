@@ -16,4 +16,6 @@ public interface OrderProductHistoryJpaRepository extends JpaRepository<OrderPro
             "GROUP BY o.productId " +
             "ORDER BY o.productId")
     List<OrderHistoryProductGroupVo> findGroupByProductIdThreeDays(LocalDateTime startDate);
+
+    List<OrderProductHistory> findByOrderId(Long orderId);
 }

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-public class DomainProductHistory {
+public class DomainOrderProductHistory {
 
     private Long id;
 
@@ -20,7 +20,7 @@ public class DomainProductHistory {
     private LocalDateTime createDateTime; // 생성 일시
 
     @Builder
-    public DomainProductHistory(Long id, Long orderId, Long productId, Integer quantity, LocalDateTime createDateTime) {
+    public DomainOrderProductHistory(Long id, Long orderId, Long productId, Integer quantity, LocalDateTime createDateTime) {
         this.id = id;
         this.orderId = orderId;
         this.productId = productId;
