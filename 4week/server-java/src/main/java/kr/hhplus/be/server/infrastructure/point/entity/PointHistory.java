@@ -2,6 +2,7 @@ package kr.hhplus.be.server.infrastructure.point.entity;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.point.model.CreatePointHistory;
+import kr.hhplus.be.server.domain.point.model.DomainPointHistory;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -59,6 +60,15 @@ public class PointHistory {
                 .user(user)
                 .type(createVo.getType())
                 .amount(createVo.getAmount())
+                .build();
+    }
+
+    public static DomainPointHistory toDomain(PointHistory history){
+        return DomainPointHistory.builder()
+                .id(history.getId())
+                .userId(history.getUser().getId())
+                .type(history.getType())
+                .amount(history.getAmount())
                 .build();
     }
 

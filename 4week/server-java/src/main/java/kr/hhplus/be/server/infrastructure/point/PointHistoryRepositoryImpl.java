@@ -2,11 +2,14 @@ package kr.hhplus.be.server.infrastructure.point;
 
 
 import kr.hhplus.be.server.domain.point.model.CreatePointHistory;
+import kr.hhplus.be.server.domain.point.model.DomainPointHistory;
 import kr.hhplus.be.server.domain.point.repository.PointHistoryRepository;
 import kr.hhplus.be.server.infrastructure.point.entity.PointHistory;
 import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,5 +25,12 @@ public class PointHistoryRepositoryImpl implements PointHistoryRepository {
                 .ifPresent(user -> {
                     JpaRepository.save(PointHistory.create(pointHistory, user));
                 });
+    }
+
+    @Override
+    public Optional<DomainPointHistory> findByAtLast() {
+        return JpaRepository.findTopByOrderByCreateDateTimeDesc().map(PointHistory::toDomain)
+                .map(Optional::of)
+                .orElse(Optional.empty());
     }
 }
