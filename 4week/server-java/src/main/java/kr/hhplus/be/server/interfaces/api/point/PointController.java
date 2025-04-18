@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("/point")
+@RequestMapping("/api/point")
 @RequiredArgsConstructor
 @Tag(name="POINT", description = "포인트 API")
 public class PointController {
