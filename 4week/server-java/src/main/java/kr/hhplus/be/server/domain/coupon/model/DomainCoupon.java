@@ -64,15 +64,5 @@ public class DomainCoupon {
         return price;
     }
 
-
-
-
-
-
-
-
-
-
-
 }
 

@@ -13,6 +13,8 @@ public interface PointRepository {
 
     DomainPoint update(UpdatePoint updatePoint);
 
+    DomainPoint save(DomainPoint domainPoint);
+
     void delete(Long userId);
 
 
