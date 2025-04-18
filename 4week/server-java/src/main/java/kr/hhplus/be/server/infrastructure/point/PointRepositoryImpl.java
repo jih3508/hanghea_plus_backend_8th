@@ -46,4 +46,9 @@ public class PointRepositoryImpl implements PointRepository {
                 .orElse(null);
     }
 
+    @Override
+    public void delete(Long userId) {
+        jpaRepository.deleteById(userId);
+    }
+
 }
