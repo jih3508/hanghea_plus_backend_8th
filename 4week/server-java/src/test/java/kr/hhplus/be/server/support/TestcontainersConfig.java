@@ -13,9 +13,10 @@ public class TestcontainersConfig {
 
     @Container
     static MySQLContainer<?> mysql = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"))
-            .withDatabaseName("hhplus")
+            .withDatabaseName("hhplus_test")
             .withUsername("test")
-            .withPassword("test");
+            .withPassword("test")
+            .withInitScript("init.sql");
 
 
     @DynamicPropertySource
