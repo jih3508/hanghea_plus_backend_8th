@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "order_product_history")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

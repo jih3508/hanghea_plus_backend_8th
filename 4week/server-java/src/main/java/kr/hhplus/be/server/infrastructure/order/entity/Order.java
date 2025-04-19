@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "order")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
