@@ -1,8 +1,10 @@
 package kr.hhplus.be.server.domain.coupon.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
-import kr.hhplus.be.server.domain.coupon.entity.CouponType;
+import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
+import kr.hhplus.be.server.domain.coupon.model.UpdateCoupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +53,7 @@ class CouponServiceTest {
     @Test
     @DisplayName("발급할 쿠폰 없을 경우")
     void 발급_쿠폰X(){
-        Coupon coupon = Coupon.builder()
+        DomainCoupon coupon = DomainCoupon.builder()
                 .id(1L)
                 .couponNumber(UUID.randomUUID().toString())
                 .type(CouponType.FLAT)
@@ -74,7 +76,7 @@ class CouponServiceTest {
     @DisplayName("발급할 쿠폰이 있을경우")
     void 발금_쿠폰O(){
         // given
-        Coupon coupon = Coupon.builder()
+        DomainCoupon coupon = DomainCoupon.builder()
                 .id(1L)
                 .couponNumber(UUID.randomUUID().toString())
                 .type(CouponType.FLAT)
@@ -86,11 +88,11 @@ class CouponServiceTest {
 
         //when
         when(couponRepository.findById(1L)).thenReturn(Optional.of(coupon));
-        Coupon result = service.issueCoupon(1L);
+        DomainCoupon result = service.issueCoupon(1L);
 
         //then
         assertThat(result.getQuantity()).isEqualTo(99);
-        verify(couponRepository, times(1)).save(any(Coupon.class));
+        verify(couponRepository, times(1)).update(any(UpdateCoupon.class));
 
     }
 

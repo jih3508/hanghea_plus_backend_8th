@@ -1,10 +1,9 @@
 package kr.hhplus.be.server.application.point;
 
-import kr.hhplus.be.server.domain.product.entity.ProductRank;
-import kr.hhplus.be.server.domain.product.service.ProductRankService;
+import kr.hhplus.be.server.domain.point.model.DomainPoint;
+import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.domain.user.service.UserService;
-import kr.hhplus.be.server.domain.user.entity.User;
-import kr.hhplus.be.server.domain.point.entity.Point;
+import kr.hhplus.be.server.infrastructure.point.entity.Point;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,10 +22,11 @@ public class PointFacade {
 
     private final UserService userService;
 
+    @Transactional(readOnly = true)
     public BigDecimal getPoint(Long userId) {
 
         userService.findById(userId);
-        Point point = service.getPoint(userId);
+        DomainPoint point = service.getPoint(userId);
 
         return point.getPoint();
     }
@@ -36,17 +35,15 @@ public class PointFacade {
      * method: charge
      * description: 포인트 충전
      */
-    @Transactional
+    @Transactional(rollbackFor =  Exception.class)
     public BigDecimal charge(PointChargeCommand command) {
 
-        User user = userService.findById(command.getUserID());
-        Point point = service.charge(command.getUserID(), command.getAmount());
+        userService.findById(command.getUserID());
+        DomainPoint point = service.charge(command.getUserID(), command.getAmount());
 
-        historyService.chargeHistory(user, command.getAmount());
+        historyService.chargeHistory(command.getUserID(), command.getAmount());
 
         return point.getPoint();
     }
-
-
 
 }

@@ -1,9 +1,12 @@
 package kr.hhplus.be.server.domain.user.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
-import kr.hhplus.be.server.domain.user.entity.User;
-import kr.hhplus.be.server.domain.user.entity.UserCoupon;
+import kr.hhplus.be.server.domain.user.model.CreateUserCoupon;
+import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
+import kr.hhplus.be.server.domain.user.model.UpdateUserCoupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
+import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
 import kr.hhplus.be.server.domain.user.repository.UserCouponRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,11 +25,10 @@ public class UserCouponService {
      * method: getUseCoupon
      * description: 사용가능한 쿠폰 가져오기
      */
-    public Coupon getUseCoupon(Long userId, Long couponId) {
-        UserCoupon userCoupon = repository.findByUserIdAndCouponId(userId, couponId)
-                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "사용가능 한 쿠폰 없습니다."));
+    public DomainUserCoupon getUseCoupon(Long userId, Long couponId) {
 
-        return userCoupon.getCoupon();
+        return repository.findByUserIdAndCouponId(userId, couponId)
+                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "사용가능 한 쿠폰 없습니다."));
     }
 
     /*
@@ -34,24 +36,20 @@ public class UserCouponService {
      * method: 쿠폰 사용 처리
      */
     public void useCoupon(Long userId, Long couponId) {
-        UserCoupon userCoupon = repository.findByUserIdAndCouponId(userId, couponId)
-                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "사용가능 한 쿠폰 없습니다."));
+        DomainUserCoupon userCoupon = this.getUseCoupon(userId, couponId);
         userCoupon.usedCoupon();
-        repository.saveUserCoupon(userCoupon);
+        repository.updateUserCoupon(new UpdateUserCoupon(userId, couponId, userCoupon.getIsUsed()));
     }
 
-    public void save(User user, Coupon coupon) {
-        UserCoupon userCoupon = UserCoupon.builder()
-                .user(user)
-                .coupon(coupon)
-                .build();
-        repository.saveUserCoupon(userCoupon);
+
+    public void issue(Long userId, Long couponId) {
+        repository.create(new CreateUserCoupon(userId, couponId));
     }
 
     /*
      * method
      */
-    public List<UserCoupon> getUserCoupons(Long userId) {
+    public List<DomainUserCoupon> getUserCoupons(Long userId) {
         return repository.findAllByUserId(userId);
     }
 

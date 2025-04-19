@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.point;
 
+import jakarta.validation.constraints.Positive;
 import kr.hhplus.be.server.interfaces.api.point.request.ChargeRequest;
 import lombok.*;
 
@@ -13,6 +14,7 @@ public class PointChargeCommand {
 
     private Long userID;
 
+    @Positive
     private BigDecimal amount;
 
     @Builder

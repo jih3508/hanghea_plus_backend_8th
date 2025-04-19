@@ -1,7 +1,10 @@
 package kr.hhplus.be.server.domain.product.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.product.entity.ProductStock;
+import kr.hhplus.be.server.domain.product.model.DomainProduct;
+import kr.hhplus.be.server.domain.product.model.DomainProductStock;
+import kr.hhplus.be.server.domain.product.model.UpdateProductStock;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductStock;
 import kr.hhplus.be.server.domain.product.repository.ProductStockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,9 +16,9 @@ public class ProductStockService {
 
     private final ProductStockRepository repository;
 
-    public ProductStock getStock(Long productId) {
+    public DomainProductStock getStock(Long productId) {
         return repository.findByProductId(productId)
-                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "재고가 없습니다."));
+                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "재고가 정보가 없습니다."));
     }
 
 
@@ -23,11 +26,13 @@ public class ProductStockService {
      * method: delivering
      * description: 출납처리
      */
-    public ProductStock delivering(Long productId, Integer quantity){
-        ProductStock stock = this.getStock(productId);
+    public DomainProductStock delivering(Long productId, Integer quantity){
+        DomainProductStock stock = this.getStock(productId);
         stock.stockDelivering(quantity);
-        repository.save(stock);
-        return stock;
+        return repository.update(UpdateProductStock.builder()
+                .productId(productId)
+                .quantity(stock.getQuantity())
+                .build());
     }
 
 

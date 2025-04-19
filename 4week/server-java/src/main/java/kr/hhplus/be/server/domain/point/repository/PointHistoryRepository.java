@@ -1,10 +1,17 @@
 package kr.hhplus.be.server.domain.point.repository;
 
-import kr.hhplus.be.server.domain.point.entity.PointHistory;
-import org.springframework.stereotype.Repository;
+import kr.hhplus.be.server.domain.point.model.CreatePointHistory;
+import kr.hhplus.be.server.domain.point.model.DomainPointHistory;
 
-@Repository
+import java.util.List;
+import java.util.Optional;
+
 public interface PointHistoryRepository {
 
-    public PointHistory save(PointHistory pointHistory);
+    void create(CreatePointHistory pointHistory);
+
+    Optional<DomainPointHistory> findByAtLast();
+
+    List<DomainPointHistory> findByUserId(Long userId);
+
 }

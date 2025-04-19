@@ -1,7 +1,9 @@
 package kr.hhplus.be.server.domain.coupon.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
+import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
+import kr.hhplus.be.server.domain.coupon.model.UpdateCoupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,16 +15,15 @@ public class CouponService {
 
     private final CouponRepository repository;
 
-    public Coupon getCoupon(Long id) {
+    public DomainCoupon getCoupon(Long id) {
         return repository.findById(id).orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "쿠폰이 없습니다."));
     }
 
 
-    public Coupon issueCoupon(Long id) {
-        Coupon coupon = this.getCoupon(id);
+    public DomainCoupon issueCoupon(Long couponId) {
+        DomainCoupon coupon = this.getCoupon(couponId);
         coupon.issueCoupon();
-        repository.save(coupon);
-        return coupon;
+        return repository.update(new UpdateCoupon(coupon.getId(), coupon.getQuantity()));
     }
 
 }

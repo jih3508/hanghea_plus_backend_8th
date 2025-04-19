@@ -1,11 +1,10 @@
 package kr.hhplus.be.server.interfaces.api.coupon.response;
 
 import kr.hhplus.be.server.application.coupon.CouponMeCommand;
-import kr.hhplus.be.server.domain.coupon.entity.CouponType;
+import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 @Getter
 @Setter

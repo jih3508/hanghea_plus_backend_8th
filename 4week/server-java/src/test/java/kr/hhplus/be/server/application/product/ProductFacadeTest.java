@@ -1,14 +1,14 @@
 package kr.hhplus.be.server.application.product;
 
-import kr.hhplus.be.server.application.point.ProductRankCommand;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.product.entity.Product;
-import kr.hhplus.be.server.domain.product.entity.ProductCategory;
-import kr.hhplus.be.server.domain.product.entity.ProductRank;
-import kr.hhplus.be.server.domain.product.entity.ProductStock;
+import kr.hhplus.be.server.domain.product.model.DomainProduct;
+import kr.hhplus.be.server.domain.product.model.DomainProductRank;
+import kr.hhplus.be.server.domain.product.model.DomainProductStock;
 import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
+import kr.hhplus.be.server.infrastructure.product.entity.Product;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,13 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,16 +59,19 @@ class ProductFacadeTest {
     @DisplayName("조회시 삳품에 대한 데이터가 있을 경우")
     void 상품_데이터O(){
         // given
-        Product product = Product.builder()
+        DomainProduct product = DomainProduct.builder()
                 .id(1L)
                 .name("노트북")
                 .price(new BigDecimal(2_000_000))
                 .category(ProductCategory.ELECTRONIC_DEVICES)
                 .build();
 
-        ProductStock stock = ProductStock.builder()
+        DomainProductStock stock = DomainProductStock.builder()
                 .id(1L)
-                .product(product)
+                .productId(1L)
+                .name("노트북")
+                .price(new BigDecimal(2_000_000))
+                .category(ProductCategory.ELECTRONIC_DEVICES)
                 .quantity(10)
                 .build();
 
@@ -122,34 +122,31 @@ class ProductFacadeTest {
                 .name("상품3")
                 .build();
 
-        ProductRank rank1 = ProductRank.builder()
+        DomainProductRank rank1 = DomainProductRank.builder()
                 .id(1L)
-                .rankDate(LocalDate.now())
-                .product(product1)
+                .productId(product1.getId())
                 .rank(1)
                 .totalQuantity(100)
                 .build();
 
 
-        ProductRank rank2 = ProductRank.builder()
+        DomainProductRank rank2 = DomainProductRank.builder()
                 .id(2L)
-                .rankDate(LocalDate.now())
-                .product(product2)
+                .productId(product2.getId())
                 .rank(2)
                 .totalQuantity(70)
                 .build();
 
 
-        ProductRank rank3 = ProductRank.builder()
+        DomainProductRank rank3 = DomainProductRank.builder()
                 .id(2L)
-                .rankDate(LocalDate.now())
-                .product(product3)
+                .productId(product3.getId())
                 .rank(3)
                 .totalQuantity(50)
                 .build();
 
 
-        List<ProductRank> ranks = List.of(rank1, rank2, rank3);
+        List<DomainProductRank> ranks = List.of(rank1, rank2, rank3);
 
         //when
         when(rankService.todayProductRank()).thenReturn(ranks);
