@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.domain.coupon.entity;
 
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @ExtendWith(MockitoExtension.class)
-
 class CouponTest {
 
     @Test

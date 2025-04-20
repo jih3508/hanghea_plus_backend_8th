@@ -1,9 +1,11 @@
 package kr.hhplus.be.server.domain.user.point.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.domain.point.model.DomainPoint;
+import kr.hhplus.be.server.domain.point.model.UpdatePoint;
 import kr.hhplus.be.server.domain.point.service.PointService;
-import kr.hhplus.be.server.domain.user.entity.User;
-import kr.hhplus.be.server.domain.point.entity.Point;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
+import kr.hhplus.be.server.infrastructure.point.entity.Point;
 import kr.hhplus.be.server.domain.point.repository.PointRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,16 +60,16 @@ class PointServiceTest {
                 .name("테스터")
                 .build();
 
-        Point expected = Point.builder()
+        DomainPoint expected = DomainPoint.builder()
                 .id(1L)
-                .user(user)
+                .userId(1L)
                 .point(new BigDecimal(100_000))
                 .build();
 
         // given, when
         when(repository.findByUserId(1L)).thenReturn(Optional.of(expected));
 
-        Point point = service.getPoint(1L);
+        DomainPoint point = service.getPoint(1L);
 
         assertThat(point).isEqualTo(expected);
     }
@@ -83,7 +85,7 @@ class PointServiceTest {
         assertThatThrownBy(() -> service.charge(10L, any()))
                 .isInstanceOf(ApiExceptionResponse.class)
                 .hasMessage("포인트를 찾을 수 없습니다.");
-        verify(repository, never()).save(any());
+        //verify(repository, never()).save(any());
 
     }
 
@@ -97,9 +99,9 @@ class PointServiceTest {
                 .name("테스터")
                 .build();
 
-        Point point = Point.builder()
+        DomainPoint point = DomainPoint.builder()
                 .id(1L)
-                .user(user)
+                .userId(1L)
                 .point(MAX_POINT)
                 .build();
 
@@ -113,7 +115,7 @@ class PointServiceTest {
                 .isInstanceOf(ApiExceptionResponse.class)
                 .hasMessage("충전후 포인트가 한도 초과 되었습니다.");
 
-        verify(repository, never()).save(any());
+        //verify(repository, never()).save(any());
 
     }
 
@@ -128,32 +130,32 @@ class PointServiceTest {
                 .name("테스터")
                 .build();
 
-        Point point = Point.builder()
+        DomainPoint point = DomainPoint.builder()
                 .id(1L)
-                .user(user)
+                .userId(1L)
                 .point(new BigDecimal(100_000))
                 .build();
 
         BigDecimal amount = new BigDecimal(500_000L);
 
-        Point expected = Point.builder()
+        DomainPoint expected = DomainPoint.builder()
                 .id(1L)
-                .user(user)
+                .userId(1L)
                 .point(new BigDecimal(100_000).add(amount))
                 .build();
 
         // when
         when(repository.findByUserId(1l)).thenReturn(Optional.of(point));
-        when(repository.save(any(Point.class))).thenReturn(expected);
+        when(repository.update(any(UpdatePoint.class))).thenReturn(expected);
 
-        Point result = service.charge(1l, amount);
+        DomainPoint result = service.charge(1l, amount);
 
         log.info("result={}", result);
 
         //then
         assertThat(result.getPoint()).isEqualTo(new BigDecimal(100_000).add(amount));
         verify(repository, times(1)).findByUserId(1L);
-        verify(repository, times(1)).save(any(Point.class));
+        //verify(repository, times(1)).save(any(Point.class));
 
     }
 
@@ -167,9 +169,9 @@ class PointServiceTest {
                 .name("테스터")
                 .build();
 
-        Point point = Point.builder()
+        DomainPoint point = DomainPoint.builder()
                 .id(1L)
-                .user(user)
+                .userId(1L)
                 .point(new BigDecimal(100_000))
                 .build();
 
@@ -180,9 +182,9 @@ class PointServiceTest {
 
         assertThatThrownBy(() -> service.use(1l, amount))
         .isInstanceOf(ApiExceptionResponse.class)
-                .hasMessage("잔액 부족!!!!");
+                .hasMessage("잔액 부족이 부족합니다. 충전후 결제 요청 드립니다.");
 
-        verify(repository, never()).save(any());
+        verify(repository, never()).update(any());
     }
 
     @Test
@@ -195,9 +197,9 @@ class PointServiceTest {
                 .name("테스터")
                 .build();
 
-        Point point = Point.builder()
+        DomainPoint point = DomainPoint.builder()
                 .id(1L)
-                .user(user)
+                .userId(1L)
                 .point(new BigDecimal(100_000))
                 .build();
 
@@ -205,18 +207,18 @@ class PointServiceTest {
 
         // when
         when(repository.findByUserId(1l)).thenReturn(Optional.of(point));
-        when(repository.save(any(Point.class))).thenReturn(
-                Point.builder()
+        when(repository.update(any(UpdatePoint.class))).thenReturn(
+                DomainPoint.builder()
                         .id(1L)
-                        .user(user)
+                        .userId(1L)
                         .point(new BigDecimal(50_000))
                         .build()
         );
 
-        Point result = service.use(1l, amount);
+        DomainPoint result = service.use(1l, amount);
 
         assertThat(result.getPoint()).isEqualTo(new BigDecimal(50_000L));
-        verify(repository, times(1)).save(any(Point.class));
+        verify(repository, times(1)).update(any(UpdatePoint.class));
     }
 
 

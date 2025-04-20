@@ -1,15 +1,10 @@
 package kr.hhplus.be.server.domain.order.vo;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
-@Getter
-@Setter
-@ToString
-public class OrderHistoryProductGroupVo {
 
-    private Long productId;
+public record OrderHistoryProductGroupVo(
+        Long productId,
+        Integer totalQuantity
+) {
 
-    private Integer totalQuantity;
 }

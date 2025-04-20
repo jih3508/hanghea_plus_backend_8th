@@ -1,11 +1,11 @@
 package kr.hhplus.be.server.application.point;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.user.service.UserService;
-import kr.hhplus.be.server.domain.user.entity.User;
-import kr.hhplus.be.server.domain.point.entity.Point;
+import kr.hhplus.be.server.domain.point.model.DomainPoint;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
+import kr.hhplus.be.server.domain.user.model.DomainUser;
+import kr.hhplus.be.server.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,8 +20,8 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,14 +61,9 @@ class PointFacadeTest {
     void 조회(){
         // given
         Long userId = 1L;
-        User user = User.builder()
+        DomainPoint point = DomainPoint.builder()
                 .id(1L)
-                .userId("test")
-                .name("테스터")
-                .build();
-        Point point = Point.builder()
-                .id(1L)
-                .user(user)
+                .userId(1L)
                 .point(new BigDecimal(100_000))
                 .build();
 
@@ -110,7 +105,7 @@ class PointFacadeTest {
     void 충전_한도_초과(){
         //given
         PointChargeCommand command = new  PointChargeCommand(1L, MAX_POINT);
-        User user = User.builder()
+        DomainUser user = DomainUser.builder()
                 .id(1L)
                 .userId("test")
                 .name("사용자1")
@@ -134,15 +129,15 @@ class PointFacadeTest {
 
         //given
         PointChargeCommand command = new  PointChargeCommand(1L, new BigDecimal(1_000_000));
-        User user = User.builder()
+        DomainUser user = DomainUser.builder()
                 .id(1L)
                 .userId("test")
                 .name("사용자1")
                 .build();
 
-        Point point = Point.builder()
+        DomainPoint point = DomainPoint.builder()
                 .id(1L)
-                .user(user)
+                .userId(1L)
                 .point(new BigDecimal(1_000_000))
                 .build();
 

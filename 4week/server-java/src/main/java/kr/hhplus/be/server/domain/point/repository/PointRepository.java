@@ -1,15 +1,18 @@
 package kr.hhplus.be.server.domain.point.repository;
 
-import kr.hhplus.be.server.domain.point.entity.Point;
-import org.springframework.stereotype.Repository;
+import kr.hhplus.be.server.domain.point.model.DomainPoint;
+import kr.hhplus.be.server.domain.point.model.UpdatePoint;
 
 import java.util.Optional;
 
-@Repository
 public interface PointRepository {
 
-    Optional<Point>  findByUserId(Long userId);
+    Optional<DomainPoint>  findByUserId(Long userId);
 
-    Point save(Point point);
+    DomainPoint create(Long userId);
+
+    DomainPoint update(UpdatePoint updatePoint);
+
+
 
 }

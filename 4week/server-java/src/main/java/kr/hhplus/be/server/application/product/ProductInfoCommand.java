@@ -1,8 +1,9 @@
 package kr.hhplus.be.server.application.product;
 
-import kr.hhplus.be.server.domain.product.entity.Product;
-import kr.hhplus.be.server.domain.product.entity.ProductCategory;
-import kr.hhplus.be.server.domain.product.entity.ProductStock;
+import kr.hhplus.be.server.domain.product.model.DomainProductStock;
+import kr.hhplus.be.server.infrastructure.product.entity.Product;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductStock;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -25,12 +26,12 @@ public class ProductInfoCommand {
     private Integer quantity;
 
 
-    public static ProductInfoCommand toCommand(Product product, ProductStock stock){
+    public static ProductInfoCommand toCommand(DomainProductStock stock){
         return ProductInfoCommand.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .price(product.getPrice())
-                .category(product.getCategory())
+                .id(stock.getProductId())
+                .name(stock.getName())
+                .price(stock.getPrice())
+                .category(stock.getCategory())
                 .quantity(stock.getQuantity())
                 .build();
     }

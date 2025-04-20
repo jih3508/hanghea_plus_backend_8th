@@ -1,14 +1,16 @@
 package kr.hhplus.be.server.domain.product.repository;
 
-import kr.hhplus.be.server.domain.product.entity.ProductStock;
+import kr.hhplus.be.server.domain.product.model.*;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductStock;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
 public interface ProductStockRepository {
 
-    Optional<ProductStock> findByProductId(Long productId);
+    Optional<DomainProductStock> findByProductId(Long productId);
 
-    ProductStock save(ProductStock productStock);
+    DomainProductStock create(CreateProductStock product);
+
+    DomainProductStock update(UpdateProductStock productStock);
 }

@@ -1,8 +1,9 @@
 package kr.hhplus.be.server.domain.point.service;
 
-import kr.hhplus.be.server.domain.user.entity.User;
-import kr.hhplus.be.server.domain.point.entity.PointHistory;
-import kr.hhplus.be.server.domain.point.entity.PointTransactionType;
+import kr.hhplus.be.server.domain.point.model.CreatePointHistory;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
+import kr.hhplus.be.server.infrastructure.point.entity.PointHistory;
+import kr.hhplus.be.server.infrastructure.point.entity.PointTransactionType;
 import kr.hhplus.be.server.domain.point.repository.PointHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,19 +19,19 @@ public class PointHistoryService {
 
     /*
      * method: chargeHistory
-     * description: 충전 이력
+     * description: 충전 이력 생성
      */
-    public PointHistory chargeHistory(User user, BigDecimal amount) {
-        PointHistory history = PointHistory.create(user, PointTransactionType.CHARGE,  amount);
-        return pointHistoryRepository.save(history);
+    public void chargeHistory(Long userId, BigDecimal amount) {
+        CreatePointHistory history = CreatePointHistory.create(userId, amount, PointTransactionType.CHARGE);
+        pointHistoryRepository.create(history);
     }
 
     /*
      method: chargeHistory
-     * description: 사용 이력
+     * description: 사용 이력 생성
      */
-    public PointHistory useHistory(User user, BigDecimal amount) {
-        PointHistory history = PointHistory.create(user, PointTransactionType.USE,  amount);
-        return pointHistoryRepository.save(history);
+    public void useHistory(Long userId, BigDecimal amount) {
+        CreatePointHistory history = CreatePointHistory.create(userId, amount, PointTransactionType.USE);
+        pointHistoryRepository.create(history);
     }
 }

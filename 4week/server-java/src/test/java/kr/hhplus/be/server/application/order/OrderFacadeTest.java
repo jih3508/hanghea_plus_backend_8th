@@ -1,17 +1,19 @@
 package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
-import kr.hhplus.be.server.domain.coupon.entity.Coupon;
-import kr.hhplus.be.server.domain.coupon.entity.CouponType;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
-import kr.hhplus.be.server.domain.order.entity.Order;
-import kr.hhplus.be.server.domain.order.entity.OrderItem;
+import kr.hhplus.be.server.domain.order.model.CreateOrder;
+import kr.hhplus.be.server.domain.order.model.DomainOrder;
+import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
+import kr.hhplus.be.server.domain.product.model.DomainProduct;
+import kr.hhplus.be.server.domain.product.service.ProductRankService;
+import kr.hhplus.be.server.infrastructure.order.entity.Order;
 import kr.hhplus.be.server.domain.order.service.OrderService;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
 import kr.hhplus.be.server.domain.point.service.PointService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
-import kr.hhplus.be.server.domain.user.entity.User;
+import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -25,11 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,6 +57,9 @@ class OrderFacadeTest {
     private ProductService productService;
 
     @Mock
+    private ProductRankService productRankService;
+
+    @Mock
     private ProductStockService productStockService;
 
     @Mock
@@ -77,16 +78,16 @@ class OrderFacadeTest {
         OrderCommand.OrderItem item3 = mock(OrderCommand.OrderItem.class);
 
         command.setItems(List.of(item1,item2,item3));
-        User user = mock(User.class);
+        DomainUser user = mock(DomainUser.class);
 
-        Order order = Order.builder().id(1L)
-                .user(user)
+        DomainOrder order = DomainOrder.builder().id(1L)
+                .userId(anyLong())
                 .totalPrice(new BigDecimal(1_000_000))
                 .build();
 
         //when
         when(userService.findById(any())).thenReturn(user);
-        when(orderService.save(any(Order.class))).thenReturn(order);
+        when(orderService.create(any(CreateOrder.class))).thenReturn(order);
         when(pointService.use(anyLong(), any())).thenThrow(new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "잔액 부족!!!!"));
 
 
@@ -94,9 +95,8 @@ class OrderFacadeTest {
         assertThatThrownBy(() -> facade.order(command))
                 .isInstanceOf(ApiExceptionResponse.class)
                 .hasMessage("잔액 부족!!!!");
-        verify(orderService, times(1)).createOrderNumber();
-        verify(orderService, times(1)).save(any(Order.class));
-        verify(orderService, times(1)).save(any(Order.class), anyList());
+        verify(facade, times(1)).createOrderNumber();
+        verify(orderService, times(1)).create(any(CreateOrder.class));
         verify(pointService, times(1)).use(any(), any());
         verify(externalTransmissionService, never()).sendOrderData();
 
@@ -114,21 +114,20 @@ class OrderFacadeTest {
         OrderCommand.OrderItem item3 = mock(OrderCommand.OrderItem.class);
 
         command.setItems(List.of(item1,item2,item3));
-        User user = mock(User.class);
-        Order order = Order.builder().id(1L)
-                .user(user)
+        DomainUser user = mock(DomainUser.class);
+        DomainOrder order = DomainOrder.builder().id(1L)
+                .userId(anyLong())
                 .totalPrice(new BigDecimal(1_000_000))
                 .build();
 
         //when
         when(userService.findById(any())).thenReturn(user);
-        when(orderService.save(any(Order.class))).thenReturn(order);
+        when(orderService.create(any(CreateOrder.class))).thenReturn(order);
         facade.order(command);
 
         // then
-        verify(orderService, times(1)).createOrderNumber();
-        verify(orderService, times(1)).save(any(Order.class));
-        verify(orderService, times(1)).save(any(Order.class), anyList());
+        verify(facade, times(1)).createOrderNumber();
+        verify(orderService, times(1)).create(any(CreateOrder.class));
         verify(pointService, times(1)).use(any(), any());
         verify(pointHistoryService, times(1)).useHistory(any(), any());
         verify(externalTransmissionService, times(1)).sendOrderData();
@@ -145,24 +144,46 @@ class OrderFacadeTest {
         OrderCommand.OrderItem item3 = mock(OrderCommand.OrderItem.class);
 
         command.setItems(List.of(item1,item2,item3));
-        User user = mock(User.class);
-        Order order = Order.builder().id(1L)
-                .user(user)
+        DomainUser user = mock(DomainUser.class);
+        DomainOrder order = DomainOrder.builder().id(1L)
+                .userId(anyLong())
                 .totalPrice(new BigDecimal(0))
                 .build();
 
         //when
         when(userService.findById(any())).thenReturn(user);
-        when(orderService.save(any(Order.class))).thenReturn(order);
+        when(orderService.create(any(CreateOrder.class))).thenReturn(order);
         facade.order(command);
 
         // then
-        verify(orderService, times(1)).createOrderNumber();
-        verify(orderService, times(1)).save(any(Order.class));
-        verify(orderService, times(1)).save(any(Order.class), anyList());
+        verify(facade, times(1)).createOrderNumber();
+        verify(orderService, times(1)).create(any(CreateOrder.class));
         verify(pointService, never()).use(any(), any());
         verify(pointHistoryService, never()).useHistory(any(), any());
         verify(externalTransmissionService, times(1)).sendOrderData();
+
+    }
+
+
+    @Test
+    @DisplayName("랭킹이력 저장 테스트")
+    void saveRank(){
+        // given
+        DomainProduct product = mock(DomainProduct.class);
+
+        OrderHistoryProductGroupVo groupVo1 = mock(OrderHistoryProductGroupVo.class);
+        OrderHistoryProductGroupVo groupVo2 = mock(OrderHistoryProductGroupVo.class);
+        OrderHistoryProductGroupVo groupVo3 = mock(OrderHistoryProductGroupVo.class);
+        OrderHistoryProductGroupVo groupVo4 = mock(OrderHistoryProductGroupVo.class);
+        List<OrderHistoryProductGroupVo> list = List.of(groupVo1, groupVo2, groupVo3, groupVo4);
+
+
+        // when
+        when(productService.getProduct(anyLong())).thenReturn(product);
+
+        //then
+        verify(productService, times(4)).getProduct(anyLong());
+        verify(productRankService, times(1)).save(anyList());
 
     }
 
