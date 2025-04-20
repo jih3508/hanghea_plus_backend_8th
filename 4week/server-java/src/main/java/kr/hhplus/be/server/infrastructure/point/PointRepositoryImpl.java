@@ -46,4 +46,14 @@ public class PointRepositoryImpl implements PointRepository {
                 .orElse(null);
     }
 
+    @Override
+    public DomainPoint save(DomainPoint domainPoint) {
+        return null;
+    }
+
+    @Override
+    public void delete(Long userId) {
+        jpaRepository.deleteById(userId);
+    }
+
 }

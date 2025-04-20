@@ -45,4 +45,9 @@ public class ProductRankRepositoryImpl implements ProductRankRepository {
     public void delleteAll() {
         repository.deleteAll();
     }
+
+    @Override
+    public List<DomainProductRank> findAll() {
+        return repository.findAll().stream().map(ProductRank::toDomain).toList();
+    }
 }

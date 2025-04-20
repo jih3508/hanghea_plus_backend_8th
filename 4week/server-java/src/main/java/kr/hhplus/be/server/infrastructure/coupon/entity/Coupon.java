@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "coupon")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString

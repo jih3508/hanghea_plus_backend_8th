@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "user_coupon")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
@@ -22,6 +23,7 @@ public class UserCoupon {
     private Long userId;
 
     @Column(name = "coupon_id")
+    @JoinColumn
     private Long couponId;
 
     @Column(name = "is_used")

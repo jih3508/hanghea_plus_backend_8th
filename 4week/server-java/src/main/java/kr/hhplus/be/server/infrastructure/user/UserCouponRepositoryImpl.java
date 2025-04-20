@@ -52,9 +52,10 @@ public class UserCouponRepositoryImpl implements UserCouponRepository {
     @Override
     public List<DomainUserCoupon> findAllByUserId(Long userId) {
 
-        return repository.findByUserId(userId).stream().map(userCoupon -> {
-            Coupon coupon = couponRepository.findById(userCoupon.getCouponId()).get();
-            return DomainUserCoupon.of(userCoupon, coupon);
-        }).toList();
+        return repository.findByUserId(userId).stream()
+                .map(userCoupon -> {
+                        Coupon coupon = couponRepository.findById(userCoupon.getCouponId()).get();
+                        return DomainUserCoupon.of(userCoupon, coupon);
+                    }).toList();
     }
 }
