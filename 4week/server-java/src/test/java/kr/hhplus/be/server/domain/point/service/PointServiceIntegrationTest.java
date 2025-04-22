@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.point.service;
 
+import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.point.model.DomainPoint;
 import kr.hhplus.be.server.domain.point.model.UpdatePoint;
 import kr.hhplus.be.server.domain.point.repository.PointRepository;
@@ -110,7 +111,7 @@ class PointServiceIntegrationTest extends IntegrationTest {
 
             // when && that
             assertThatThrownBy(() -> service.charge(userId, amount))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(ApiExceptionResponse.class)
                     .hasMessage("충전후 포인트가 한도 초과 되었습니다.");
 
         }
@@ -124,7 +125,7 @@ class PointServiceIntegrationTest extends IntegrationTest {
 
             // when && then
             assertThatThrownBy(() -> service.charge(userId, amount))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(ApiExceptionResponse.class)
                     .hasMessage("충전 포인트 금액이 1원 이상이여야 합니다.");
         }
 
@@ -160,7 +161,7 @@ class PointServiceIntegrationTest extends IntegrationTest {
 
             //when && then
             assertThatThrownBy(() -> service.use(userId, amount))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(ApiExceptionResponse.class)
                     .hasMessage("잔액 부족이 부족합니다. 충전후 결제 요청 드립니다.");
         }
 
