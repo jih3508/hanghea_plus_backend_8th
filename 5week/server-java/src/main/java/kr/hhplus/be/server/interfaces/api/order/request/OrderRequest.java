@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -14,8 +15,10 @@ import java.util.List;
 @ToString
 public class OrderRequest {
 
-    private List<OrderCommand.OrderItem> items;
+    private List<OrderRequest.OrderItem> items = new ArrayList<>();
 
+    @Getter
+    @Setter
     public static class OrderItem{
 
         @NotNull
