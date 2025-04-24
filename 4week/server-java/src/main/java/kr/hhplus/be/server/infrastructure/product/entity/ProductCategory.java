@@ -7,7 +7,7 @@ public enum ProductCategory {
 
     FOOD("FOOD", "음식"),
     ELECTRONIC_DEVICES("ELECTRONIC_DEVICES", "전자기기"),
-    ETC("ECT", "기타");
+    ETC("ETC", "기타");
 
 
     private final String code;

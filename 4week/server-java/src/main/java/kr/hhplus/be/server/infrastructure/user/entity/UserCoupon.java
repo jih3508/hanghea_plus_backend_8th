@@ -38,6 +38,7 @@ public class UserCoupon {
         this.userId = userId;
         this.couponId = couponId;
         this.isUsed = isUsed;
+        this.issuedDateTime = LocalDateTime.now();
     }
 
     public void setIsUsed(Boolean isUsed) {

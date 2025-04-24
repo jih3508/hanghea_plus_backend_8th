@@ -42,12 +42,12 @@ public class Coupon {
     private LocalDateTime endDateTime;
 
     @CreatedDate
-    @Column(name = "create_date_time", updatable = false)
-    private LocalDateTime createDateTime; // 생성 일시
+    @Column(name = "created_date_time", updatable = false)
+    private LocalDateTime createdDateTime; // 생성 일시
 
     @LastModifiedDate
-    @Column(name = "update_date_time")
-    private LocalDateTime updateDateTime; // 수정 일시
+    @Column(name = "updated_date_time")
+    private LocalDateTime updatedDateTime; // 수정 일시
 
     @Builder
     public Coupon(Long id, String couponNumber, Integer quantity, CouponType type, Integer rate, BigDecimal discountPrice, LocalDateTime startDateTime, LocalDateTime endDateTime) {
@@ -59,7 +59,7 @@ public class Coupon {
         this.discountPrice = discountPrice;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
-        this.createDateTime = LocalDateTime.now();
+        this.createdDateTime = LocalDateTime.now();
     }
 
 

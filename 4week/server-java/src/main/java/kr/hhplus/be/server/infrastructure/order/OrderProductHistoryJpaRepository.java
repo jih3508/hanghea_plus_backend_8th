@@ -14,7 +14,7 @@ public interface OrderProductHistoryJpaRepository extends JpaRepository<OrderPro
 
     @Query("SELECT o.productId AS productId, SUM(o.quantity) AS totalQuantity " +
             "FROM OrderProductHistory o " +
-            "WHERE o.createDateTime >= :startDate " +
+            "WHERE o.createdDateTime >= :startDate " +
             "GROUP BY o.productId " +
             "ORDER BY SUM(o.quantity) DESC")
     List<OrderHistoryProductGroupVo> findGroupByProductIdThreeDays(LocalDateTime startDate);

@@ -6,11 +6,12 @@ import kr.hhplus.be.server.domain.coupon.model.UpdateCoupon;
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
 import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 public class CouponRepositoryImpl implements CouponRepository {
 

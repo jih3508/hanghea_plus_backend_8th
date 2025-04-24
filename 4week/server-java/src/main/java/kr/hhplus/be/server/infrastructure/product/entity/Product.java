@@ -23,6 +23,9 @@ public class Product {
 
     private String name;
 
+    @Column(name = "product_number", unique = true)
+    private String productNumber;
+
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
@@ -30,17 +33,18 @@ public class Product {
 
 
     @CreatedDate
-    @Column(name = "create_date_time", updatable = false)
+    @Column(name = "created_date_time", updatable = false)
     private LocalDateTime createDateTime; // 생성 일시
 
     @LastModifiedDate
-    @Column(name = "update_date_time")
+    @Column(name = "updated_date_time")
     private LocalDateTime updateDateTime; // 수정 일시
 
     @Builder
-    public Product(Long id, String name, BigDecimal price, ProductCategory category) {
+    public Product(Long id, String name, String productNumber, BigDecimal price, ProductCategory category) {
         this.id = id;
         this.name = name;
+        this.productNumber = productNumber;
         this.price = price;
         this.category = category;
         this.createDateTime = LocalDateTime.now();
@@ -52,6 +56,7 @@ public class Product {
                 .name(product.getName())
                 .price(product.getPrice())
                 .category(product.getCategory())
+                .productNumber(product.getProductNumber())
                 .build();
     }
 

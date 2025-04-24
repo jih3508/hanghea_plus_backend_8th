@@ -41,6 +41,7 @@ dependencies {
 
 	//springdoc-openapi Swagger UI 추가
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+	implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.7")
 
     // DB
 	runtimeOnly("com.mysql:mysql-connector-j")

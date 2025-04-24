@@ -10,7 +10,7 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "order_itme")
+@Table(name = "order_item")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

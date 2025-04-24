@@ -28,8 +28,8 @@ public class OrderProductHistory {
     private Integer quantity;
 
     @CreatedDate
-    @Column(name = "create_date_time", updatable = false)
-    private LocalDateTime createDateTime; // 생성 일시
+    @Column(name = "created_date_time", updatable = false)
+    private LocalDateTime createdDateTime; // 생성 일시
 
     @Builder
     public OrderProductHistory(Long id, Long orderId, Long productId, Integer quantity) {
@@ -37,7 +37,7 @@ public class OrderProductHistory {
         this.orderId = orderId;
         this.productId = productId;
         this.quantity = quantity;
-        this.createDateTime = LocalDateTime.now();
+        this.createdDateTime = LocalDateTime.now();
     }
 
     public static OrderProductHistory create(CreateOrderProductHistory create) {
@@ -55,7 +55,7 @@ public class OrderProductHistory {
                 .orderId(this.orderId)
                 .productId(this.productId)
                 .quantity(this.quantity)
-                .createDateTime(this.createDateTime)
+                .createDateTime(this.createdDateTime)
                 .build();
     }
 }

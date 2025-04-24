@@ -16,5 +16,7 @@ public class CreateProduct {
 
     private BigDecimal price;
 
+    private String productNumber;
+
     private ProductCategory category;
 }

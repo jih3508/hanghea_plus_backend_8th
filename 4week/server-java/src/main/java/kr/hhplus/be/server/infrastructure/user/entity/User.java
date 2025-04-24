@@ -54,6 +54,7 @@ public class User {
         return DomainUser.builder()
                 .id(this.id)
                 .name(this.name)
+                .userId(this.userId)
                 .createDateTime(this.createDateTime)
                 .updateDateTime(this.updateDateTime)
                 .build();

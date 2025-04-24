@@ -4,7 +4,10 @@ import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.user.model.CreateUser;
 import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.domain.user.repository.UserRepository;
+import kr.hhplus.be.server.infrastructure.user.entity.User;
+import kr.hhplus.be.server.support.DatabaseCleanup;
 import kr.hhplus.be.server.support.IntegrationTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -44,17 +47,18 @@ public class UserServiceIntegrationTest  extends IntegrationTest {
     void 사용자_조회(){
         //given
         Long id= 1L;
-        CreateUser user = CreateUser.builder()
+        CreateUser createUser = CreateUser.builder()
                 .name("홍길동")
                 .id("test")
                 .build();
 
-        userRepository.create(user);
+        User user = userRepository.create(createUser);
+        log.info(user.toString());
 
         // when
         DomainUser result  = userService.findById(id);
 
-        assertThat(result.getName()).isEqualTo("test");
+        assertThat(result.getName()).isEqualTo("홍길동");
         assertThat(result.getUserId()).isEqualTo("test");
 
     }

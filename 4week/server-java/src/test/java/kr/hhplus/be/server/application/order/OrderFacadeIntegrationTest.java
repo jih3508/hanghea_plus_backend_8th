@@ -25,7 +25,9 @@ import kr.hhplus.be.server.domain.user.model.CreateUserCoupon;
 import kr.hhplus.be.server.domain.user.repository.UserCouponRepository;
 import kr.hhplus.be.server.domain.user.repository.UserRepository;
 import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
+import kr.hhplus.be.server.support.DatabaseCleanup;
 import kr.hhplus.be.server.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -94,6 +96,7 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
                 .id("testuser")
                 .build();
         User user = userRepository.create(createUser);
+        log.info(user.toString());
 
         // 충분한 포인트를 가진 사용자 생성
         pointRepository.create(user.getId());
@@ -110,19 +113,25 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         // 상품 생성
         CreateProduct createProduct1 = CreateProduct.builder()
                 .name("상품1")
+                .category(ProductCategory.ETC)
                 .price(new BigDecimal(50_000))
+                .productNumber("NUMBER01")
                 .build();
         DomainProduct product1 = productRepository.create(createProduct1);
 
         CreateProduct createProduct2 = CreateProduct.builder()
                 .name("상품2")
+                .category(ProductCategory.ETC)
                 .price(new BigDecimal(100_000))
+                .productNumber("NUMBER02")
                 .build();
         DomainProduct product2 = productRepository.create(createProduct2);
 
         CreateProduct createProduct3 = CreateProduct.builder()
                 .name("상품3")
+                .category(ProductCategory.ETC)
                 .price(new BigDecimal(150_000))
+                .productNumber("NUMBER03")
                 .build();
         DomainProduct product3 = productRepository.create(createProduct3);
 

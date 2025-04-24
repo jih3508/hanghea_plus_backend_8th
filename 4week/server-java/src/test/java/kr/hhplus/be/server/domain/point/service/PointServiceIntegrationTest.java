@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.beans.Statement;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,7 +80,7 @@ class PointServiceIntegrationTest extends IntegrationTest {
 
         // when && that
         assertThatThrownBy(() -> service.getPoint(userId))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(ApiExceptionResponse.class)
                 .hasMessage("포인트를 찾을 수 없습니다.");
     }
 

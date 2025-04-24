@@ -63,7 +63,7 @@ create table product
     name              varchar(500)                               not null comment '상품명',
     product_number    varchar(500)                               not null comment '상품 번호',
     price             decimal  default 0                         not null comment '가격',
-    category          enum ('FOOD', 'ELECTRONIC_DEVICES', 'ECT') not null comment '카테코리',
+    category          enum ('FOOD', 'ELECTRONIC_DEVICES', 'ETC') not null comment '카테코리',
     created_date_time datetime default CURRENT_TIMESTAMP         not null comment '생성 일시',
     updated_date_time datetime                                   null comment '수정 일시',
     constraint product_number
@@ -142,7 +142,7 @@ create table order_product_history
     order_id   bigint null comment '주문 FK',
     product_id bigint not null comment '상품 fk',
     quantity   int    not null comment '수량',
-    create_date_time datetime default CURRENT_TIMESTAMP not null
+    created_date_time datetime default CURRENT_TIMESTAMP not null
 )
     comment '주문 상품 이력';
 
