@@ -49,6 +49,9 @@ public class Coupon {
     @Column(name = "updated_date_time")
     private LocalDateTime updatedDateTime; // 수정 일시
 
+    @Version
+    private Long version;
+
 
 
     @Builder
