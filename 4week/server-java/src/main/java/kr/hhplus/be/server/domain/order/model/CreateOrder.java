@@ -22,7 +22,7 @@ public class CreateOrder {
 
     private BigDecimal discountPrice;
 
-    List<OrderItem> orderItems;
+    private List<OrderItem> orderItems;
 
     public CreateOrder(Long userId, String orderNumber) {
         this.userId = userId;
@@ -47,7 +47,7 @@ public class CreateOrder {
             this.totalPrice = totalPrice.add(totalPrice);
         }
 
-        orderItems.add(
+        this.orderItems.add(
                 OrderItem.builder()
                         .productId(product.getId())
                         .couponId(userCoupon.getCouponId())

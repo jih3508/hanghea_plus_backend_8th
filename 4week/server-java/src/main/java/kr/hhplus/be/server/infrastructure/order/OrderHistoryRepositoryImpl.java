@@ -6,12 +6,12 @@ import kr.hhplus.be.server.domain.order.repository.OrderProductHistoryRepository
 import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.infrastructure.order.entity.OrderProductHistory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 public class OrderHistoryRepositoryImpl implements OrderProductHistoryRepository {
 

@@ -20,7 +20,7 @@ public class ProductStock {
     private Long id;
 
     @ManyToOne
-    @Column(name = "product_id", unique = true)
+    @JoinColumn(name = "product_id", unique = true)
     private Product product;
 
 

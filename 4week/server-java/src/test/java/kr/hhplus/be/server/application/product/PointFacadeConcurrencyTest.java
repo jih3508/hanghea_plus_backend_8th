@@ -6,6 +6,7 @@ import kr.hhplus.be.server.domain.point.model.DomainPoint;
 import kr.hhplus.be.server.domain.point.model.DomainPointHistory;
 import kr.hhplus.be.server.domain.point.repository.PointHistoryRepository;
 import kr.hhplus.be.server.domain.point.repository.PointRepository;
+import kr.hhplus.be.server.domain.point.service.PointService;
 import kr.hhplus.be.server.domain.user.model.CreateUser;
 import kr.hhplus.be.server.domain.user.repository.UserRepository;
 import kr.hhplus.be.server.infrastructure.point.entity.PointTransactionType;
@@ -45,10 +46,14 @@ class PointFacadeConcurrencyTest extends IntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private PointRepository pointRepository;
+    private PointService pointService;
 
     @Autowired
     private PointHistoryRepository pointHistoryRepository;
+
+    @Autowired
+    private PointRepository pointRepository;
+
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -279,7 +284,7 @@ class PointFacadeConcurrencyTest extends IntegrationTest {
                         totalCharged.getAndUpdate(current -> current.add(amount));
                     } else {
                         // 사용 실행 (직접 서비스 호출, 파사드를 통해 사용 메서드가 없으므로)
-                        service.use(userId, amount);
+                        pointService.use(userId, amount);
                         useSuccessCount.incrementAndGet();
                         totalUsed.getAndUpdate(current -> current.add(amount));
                     }

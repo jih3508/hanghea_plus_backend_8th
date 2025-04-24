@@ -8,11 +8,12 @@ import kr.hhplus.be.server.domain.point.repository.PointRepository;
 import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 public class PointRepositoryImpl implements PointRepository {
 

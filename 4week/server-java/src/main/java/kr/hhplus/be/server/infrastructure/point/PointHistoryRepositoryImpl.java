@@ -7,12 +7,12 @@ import kr.hhplus.be.server.domain.point.repository.PointHistoryRepository;
 import kr.hhplus.be.server.infrastructure.point.entity.PointHistory;
 import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 public class PointHistoryRepositoryImpl implements PointHistoryRepository {
 
@@ -37,6 +37,6 @@ public class PointHistoryRepositoryImpl implements PointHistoryRepository {
 
     @Override
     public List<DomainPointHistory> findByUserId(Long userId) {
-        return JpaRepository.findAlByUserId();
+        return JpaRepository.findAllByUserId(userId).stream().map(PointHistory::toDomain).toList();
     }
 }

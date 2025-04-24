@@ -36,7 +36,7 @@ public class PointHistory {
 
     @CreatedDate
     @Column(name = "create_date_time", updatable = false)
-    private LocalDateTime createdDateTime; // 생성 일시
+    private LocalDateTime createDateTime; // 생성 일시
 
     @Builder
     public PointHistory(Long id, User user, PointTransactionType type, BigDecimal amount) {
@@ -44,7 +44,7 @@ public class PointHistory {
         this.user = user;
         this.type = type;
         this.amount = amount;
-        this.createdDateTime = LocalDateTime.now();
+        this.createDateTime = LocalDateTime.now();
     }
 
     public static PointHistory create(User user, PointTransactionType type, BigDecimal amount) {

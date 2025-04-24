@@ -32,6 +32,6 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public List<DomainOrder> findByUserId(Long userId) {
-        return repository.findAllByUserId(userId).stream().map(Order::toDomain);
+        return repository.findAllByUserId(userId).stream().map(Order::toDomain).toList();
     }
 }

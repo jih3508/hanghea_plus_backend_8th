@@ -20,7 +20,7 @@ public class ProductRank {
     private Long id;
 
     @ManyToOne
-    @Column(name ="product_id")
+    @JoinColumn(name ="product_id")
     private Product product;
 
     @Column(name = "rankDate")
