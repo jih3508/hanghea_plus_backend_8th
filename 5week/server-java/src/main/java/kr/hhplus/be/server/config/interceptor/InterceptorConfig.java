@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.config.interceptor;
 
+import kr.hhplus.be.server.common.interceptor.UserValidationInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.config.aspect;
+package kr.hhplus.be.server.common.aspect;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

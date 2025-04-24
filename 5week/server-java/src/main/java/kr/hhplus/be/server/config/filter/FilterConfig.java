@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.config.filter;
 
+import kr.hhplus.be.server.common.filter.AuthenticationFilter;
+import kr.hhplus.be.server.common.filter.RateLimitFilter;
+import kr.hhplus.be.server.common.filter.RequestLoggingFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

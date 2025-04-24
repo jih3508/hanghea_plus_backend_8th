@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.config.filter;
+package kr.hhplus.be.server.common.filter;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
