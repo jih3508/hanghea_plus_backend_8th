@@ -29,6 +29,9 @@ public class Point {
     @Column(name = "point", precision = 10, scale = 2)
     private BigDecimal point;
 
+    @Version
+    private Long version;
+
     @Builder
     private Point(Long id, User user, BigDecimal point) {
         this.id = id;

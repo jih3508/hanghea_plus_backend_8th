@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.point.service;
 
+import jakarta.persistence.Table;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.point.model.DomainPoint;
 import kr.hhplus.be.server.domain.point.model.UpdatePoint;
@@ -8,6 +9,7 @@ import kr.hhplus.be.server.domain.point.repository.PointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -21,7 +23,6 @@ public class PointService {
      * method: getPoint
      * description: 포인트 조회
      */
-
     public DomainPoint getPoint(Long userID) {
 
         return repository.findByUserId(userID)
@@ -32,6 +33,7 @@ public class PointService {
      * method: charge
      * description: 포인트 충전
      */
+    @Transactional
     public DomainPoint charge(Long userID, BigDecimal amount) {
 
         DomainPoint point = this.getPoint(userID);
@@ -50,7 +52,7 @@ public class PointService {
      * method: use
      * description: 포인트 사용
      */
-
+    @Transactional
     public DomainPoint use(Long userID, BigDecimal amount) {
         DomainPoint point = this.getPoint(userID);
         point.use(amount);

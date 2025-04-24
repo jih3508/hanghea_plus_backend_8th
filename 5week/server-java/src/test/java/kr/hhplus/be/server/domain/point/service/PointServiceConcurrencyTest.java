@@ -11,6 +11,8 @@ import kr.hhplus.be.server.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("포인트 서비스 동시성 테스트")
 class PointServiceConcurrencyTest extends IntegrationTest {
 
+    private static final Logger log = LoggerFactory.getLogger(PointServiceConcurrencyTest.class);
     @Autowired
     private PointService pointService;
 
@@ -94,18 +97,16 @@ class PointServiceConcurrencyTest extends IntegrationTest {
 
                     // 트랜잭션 내에서 포인트 사용 시도
                     transactionTemplate.execute(status -> {
-                        try {
-                            pointService.charge(userId, useAmount);
-                            successCount.incrementAndGet();
-                        } catch (ApiExceptionResponse e) {
-                            failureCount.incrementAndGet();
-                        }
+                        pointService.charge(userId, useAmount);
+                        successCount.incrementAndGet();
                         return null;
                     });
 
                 } catch (Exception e) {
+                    log.error(e.getMessage(), e);
                     failureCount.incrementAndGet();
                 } finally {
+
                     completionLatch.countDown();
                 }
             });

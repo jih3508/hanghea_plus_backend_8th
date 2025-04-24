@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @ActiveProfiles("test")
 @SpringBootTest
+@Transactional
 public abstract class IntegrationTest {
 
     @Autowired
