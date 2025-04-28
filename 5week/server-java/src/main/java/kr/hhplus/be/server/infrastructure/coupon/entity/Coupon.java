@@ -49,6 +49,11 @@ public class Coupon {
     @Column(name = "updated_date_time")
     private LocalDateTime updatedDateTime; // 수정 일시
 
+    @Version
+    private Long version;
+
+
+
     @Builder
     public Coupon(Long id, String couponNumber, Integer quantity, CouponType type, Integer rate, BigDecimal discountPrice, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.id = id;
@@ -102,7 +107,7 @@ public class Coupon {
     public static Coupon createCoupon(CreateCoupon createCoupon) {
         return Coupon.builder()
                 .couponNumber(createCoupon.getCouponNumber())
-                .quantity(100)
+                .quantity(createCoupon.getQuantity())
                 .type(createCoupon.getType())
                 .rate(createCoupon.getRate())
                 .discountPrice(createCoupon.getDiscountPrice())

@@ -24,7 +24,7 @@ public class PointRepositoryImpl implements PointRepository {
     @Override
     public Optional<DomainPoint> findByUserId(Long userId) {
 
-        return jpaRepository.findByUserId(userId)
+        return jpaRepository.findByUserIdWithLock(userId)
                 .map(Point::toDomain);
     }
 
