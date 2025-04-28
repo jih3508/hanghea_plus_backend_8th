@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.http.HttpStatus;
 
+import java.util.Map;
+
 @ToString
 @Builder
 @AllArgsConstructor
@@ -50,4 +52,25 @@ public class ApiResponse<T> {
                 .build();
     }
 
+
+    public static <T> ApiResponse<T> error(T data, HttpStatus httpStatus) {
+        return ApiResponse.<T>builder()
+                .data(data)
+                .status(httpStatus)
+                .build();
+    }
+
+    public static ApiResponse<String> error(String errors, HttpStatus httpStatus) {
+        return ApiResponse.<String>builder()
+                .data( errors)
+                .status(httpStatus)
+                .build();
+    }
+
+    public static ApiResponse<String> error(String errors){
+        return ApiResponse.<String>builder()
+                .data( errors)
+                .status(HttpStatus.BAD_REQUEST)
+                .build();
+    }
 }

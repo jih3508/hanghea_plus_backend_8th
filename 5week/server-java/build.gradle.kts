@@ -46,6 +46,12 @@ dependencies {
     // DB
 	runtimeOnly("com.mysql:mysql-connector-j")
 
+	implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
+
+	// Optional extensions
+	implementation("com.github.ben-manes.caffeine:guava:3.2.0")
+	implementation("com.github.ben-manes.caffeine:jcache:3.2.0")
+
 
 }
 
