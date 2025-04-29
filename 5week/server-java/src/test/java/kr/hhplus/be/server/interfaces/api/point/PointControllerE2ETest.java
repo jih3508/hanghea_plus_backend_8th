@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Sql(scripts = {"/sql/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+//@Sql(scripts = {"classpath:sql/test-data.sql"})
 public class PointControllerE2ETest extends E2ETest {
 
     @Test
@@ -54,12 +54,16 @@ public class PointControllerE2ETest extends E2ETest {
     void chargePointWithNegativeAmountE2ETest() throws Exception {
         // given
         Long userId = 1L;
-        ChargeRequest request = new ChargeRequest(BigDecimal.valueOf(-5000));
+        String requestBody = """
+        {
+            "amount": -5000
+        }
+        """;
 
         // when & then
         mockMvc.perform(post("/api/point/charge/{userId}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(requestBody))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
@@ -68,10 +72,10 @@ public class PointControllerE2ETest extends E2ETest {
     @DisplayName("존재하지 않는 사용자 포인트 조회 E2E 테스트")
     void getNonExistingUserPointE2ETest() throws Exception {
         // given
-        Long nonExistingUserId = 999L;
+        Long userId = 999L;
 
         // when & then
-        mockMvc.perform(get("/api/point/{userId}", nonExistingUserId))
+        mockMvc.perform(get("/api/point/{userId}", userId))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }

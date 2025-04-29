@@ -1,3 +1,23 @@
+-- SET FOREIGN_KEY_CHECKS = 0;
+-- TRUNCATE TABLE point_history;
+--
+-- TRUNCATE TABLE user_coupon;
+--
+-- TRUNCATE TABLE product_rank;
+--
+-- TRUNCATE TABLE product_stock;
+--
+-- TRUNCATE TABLE product;
+--
+-- TRUNCATE TABLE coupon;
+--
+-- TRUNCATE TABLE point;
+--
+-- TRUNCATE TABLE user;
+--
+--
+-- SET FOREIGN_KEY_CHECKS = 1;
+
 -- Insert test users
 INSERT INTO user (id, name, user_id, create_date_time) 
 VALUES (1, 'Test User 1', 'testuser1', NOW()),
