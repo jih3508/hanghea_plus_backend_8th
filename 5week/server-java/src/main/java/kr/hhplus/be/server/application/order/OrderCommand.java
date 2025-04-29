@@ -34,8 +34,8 @@ public class OrderCommand {
         List<OrderCommand.OrderItem> list = new LinkedList<>();
         request.getItems().forEach(item->{
             OrderItem orderItem = OrderCommand.OrderItem.builder()
-                    .productId(item.productId)
-                    .quantity(item.quantity)
+                    .productId(item.getProductId())
+                    .quantity(item.getQuantity())
                     .build();
             list.add(orderItem);
         });
