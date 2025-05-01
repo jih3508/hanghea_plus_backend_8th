@@ -12,4 +12,8 @@ public interface OrderRepository {
     DomainOrder create(CreateOrder createOrder);
 
     List<DomainOrder> findByUserId(Long userId);
+    
+    DomainOrder findById(Long orderId);
+    
+    void updateStatus(Long orderId, String status);
 }

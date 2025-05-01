@@ -20,6 +20,14 @@ public class CreateOrder {
 
     private String orderNumber;
 
+    @Builder
+    public CreateOrder(Long userId, BigDecimal totalPrice, String orderNumber, BigDecimal discountPrice) {
+        this.userId = userId;
+        this.totalPrice = totalPrice;
+        this.orderNumber = orderNumber;
+        this.discountPrice = discountPrice;
+    }
+
     private BigDecimal discountPrice;
 
     private List<OrderItem> orderItems;
