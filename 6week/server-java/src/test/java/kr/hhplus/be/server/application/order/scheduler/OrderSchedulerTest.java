@@ -5,7 +5,7 @@ import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.domain.product.model.DomainProduct;
 import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
-import kr.hhplus.be.server.interfaces.api.order.scheduler.OrderScheduler;
+import kr.hhplus.be.server.interfaces.sceduler.order.OrderScheduler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
