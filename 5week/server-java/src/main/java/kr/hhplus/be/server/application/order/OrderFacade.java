@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.order;
 
-import jakarta.transaction.Transactional;
+import kr.hhplus.be.server.common.lock.DistributedLockType;
+import kr.hhplus.be.server.common.lock.DistributedLockable;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
@@ -20,7 +21,9 @@ import kr.hhplus.be.server.domain.user.service.UserService;
 import kr.hhplus.be.server.infrastructure.order.entity.OrderItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -51,6 +54,11 @@ public class OrderFacade {
     private final ProductRankService productRankService;
 
 
+    /**
+     * Process an order with distributed lock on product stock
+     * Lock is applied for each product in the order to prevent stock race conditions
+     */
+    @DistributedLockable(key = "'order:product:' + #command.items[0].productId", lockType = DistributedLockType.REDISSON)
     @Transactional
     public void order(OrderCommand command){
 
@@ -101,7 +109,13 @@ public class OrderFacade {
         return String.format("{0}{1}{2}%08d", now.getYear(), now.getMonth(), now.getDayOfMonth(), (int)(Math.random() * 1_000_000_000) + 1);
     }
 
+    /**
+     * 주문 랭킹 업데이트 후 캐시 무효화
+     * 랭킹 데이터를 업데이트한 후 캐시를 삭제하여 다음 요청 시 최신 데이터가 조회되도록 함
+     */
+    @CacheEvict(value = "productRanks", key = "'today'")
     public void updateRank(){
+        log.info("Updating product rank and evicting cache");
         List<OrderHistoryProductGroupVo> list = service.threeDaysOrderProductHistory();
         int size = list.size();
         List<CreateProductRank> productRanks = new LinkedList<>();
@@ -121,6 +135,7 @@ public class OrderFacade {
         }
 
         productRankService.save(productRanks);
+        log.info("Product rank updated and cache evicted");
     }
 
 }

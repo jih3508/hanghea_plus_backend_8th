@@ -1,36 +1,30 @@
 package kr.hhplus.be.server.common.lock;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DistributedLock {
-    /**
-     * 락의 이름
-     */
-    String key();
-
-    /**
-     * 락의 접두사
-     */
-    String prefix() default "lock";
-
-    /**
-     * 락을 기다리는 시간 (기본값 5초)
-     */
-    long waitTime() default 5L;
+/**
+ * 분산락(Distributed Lock) 구현을 위한 인터페이스
+ * 세 가지 구현체(Simple Lock, Spin Lock, Redisson)에서 공통적으로 사용되는 메서드 정의
+ */
+public interface DistributedLock {
     
     /**
-     * 락 유지 시간 (기본값 3초)
+     * 락을 획득하고 실행 결과를 반환하는 메서드
+     * 
+     * @param key 락 식별자
+     * @param timeoutMillis 락 타임아웃 시간(밀리초)
+     * @param supplier 락 획득 후 실행할 로직
+     * @return 실행 결과값
+     * @param <T> 반환 타입
      */
-    long leaseTime() default 3L;
+    <T> T executeWithLock(String key, long timeoutMillis, Supplier<T> supplier);
     
     /**
-     * 시간 단위 (기본값 SECONDS)
+     * 락을 획득하고 로직을 실행하는 메서드 (반환값 없음)
+     * 
+     * @param key 락 식별자
+     * @param timeoutMillis 락 타임아웃 시간(밀리초)
+     * @param runnable 락 획득 후 실행할 로직
      */
-    TimeUnit timeUnit() default TimeUnit.SECONDS;
+    void executeWithLock(String key, long timeoutMillis, Runnable runnable);
 }
