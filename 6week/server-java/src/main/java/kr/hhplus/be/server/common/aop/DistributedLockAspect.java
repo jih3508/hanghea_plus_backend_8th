@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.common.aop;
 
 import kr.hhplus.be.server.common.lock.DistributedLock;
+import kr.hhplus.be.server.common.lock.LockKeyELParser;
 import kr.hhplus.be.server.common.lock.LockStrategy;
 import kr.hhplus.be.server.common.lock.LockType;
 import kr.hhplus.be.server.domain.lock.LockServiceTemplate;
@@ -30,6 +31,7 @@ import java.util.Map;
 public class DistributedLockAspect {
 
     private final ApplicationContext applicationContext;
+    private final LockKeyELParser lockKeyELParser;
 
     private final Map<LockStrategy, String> lockBeanNames = new HashMap<>() {{
         put(LockStrategy.SIMPLE_LOCK, "simpleLockService");
@@ -51,16 +53,17 @@ public class DistributedLockAspect {
 
 
         switch (lockType) {
-            case PRODUCT ->{
-                List<String> keys = Arrays.stream(lockable.keys())
+            case STOCK ->{
+                String stringKeys = lockKeyELParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), lockable.key());
+                List<String> keys = Arrays.stream(stringKeys.split(","))
                         .map(key ->  stockService.getStock(Long.parseLong(key)))
-                        .map(stock -> lockType.getCode() + stock.getId())
+                        .map(stock -> lockType.getLockName() + stock.getId())
                         .toList();
 
                 return lockService.executeWithLockList(keys, lockable.waitTime(), lockable.leaseTime(), lockable.timeUnit() ,joinPoint::proceed);
             }
             default -> {
-                String key = lockType.getCode() + lockable.key();
+                String key = lockType.getLockName() + lockKeyELParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), lockable.key());
                 return lockService.executeWithLock(key, lockable.waitTime(), lockable.leaseTime(), lockable.timeUnit() , joinPoint::proceed);
             }
         }
