@@ -14,7 +14,7 @@ public @interface DistributedLock {
     /**
      * 락의 이름
      */
-    String key();
+    String key() default "";
 
     String[] keys() default {};
 
