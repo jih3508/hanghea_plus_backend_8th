@@ -21,7 +21,7 @@ public class SpinLockService implements LockServiceTemplate {
     private static final int MAX_RETRIES = 30;
 
     @Override
-    public <T> T executeWithLock(String key, Long waitTime, Long leaseTime, TimeUnit timeUnit, Supplier<T> supplier) {
+    public <T> T executeWithLock(String key, Long waitTime, Long leaseTime, TimeUnit timeUnit, LockCallback<T> callback) throws Throwable{
         boolean acquired = false;
         int retryCount = 0;
 
@@ -49,7 +49,7 @@ public class SpinLockService implements LockServiceTemplate {
 
             }
             // 락 획득 성공 시 로직 실행
-            return  supplier.get();
+            return  callback.doInLock();
         }  finally {
             // 락 해제
             if (acquired) {
@@ -60,7 +60,7 @@ public class SpinLockService implements LockServiceTemplate {
     }
 
     @Override
-    public <T> T executeWithLockList(List<String> keys, Long waitTime, Long leaseTime, TimeUnit timeUnit, Supplier<T> supplier) {
+    public <T> T executeWithLockList(List<String> keys, Long waitTime, Long leaseTime, TimeUnit timeUnit, LockCallback<T> callback) throws Throwable{
         // 데드락 방지를 위해 키 정렬
         keys.sort(String.CASE_INSENSITIVE_ORDER);
 
@@ -102,7 +102,7 @@ public class SpinLockService implements LockServiceTemplate {
             }
 
             // 모든 락을 획득한 상태에서 supplier 실행
-            return supplier.get();
+            return callback.doInLock();
         } finally {
             // 모든 락 해제
             releaseAllLocks(acquiredLocks);

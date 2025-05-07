@@ -18,7 +18,7 @@ public class PubSubLockService implements LockServiceTemplate {
     private final RedissonClient redissonClient;
 
     @Override
-    public <T> T executeWithLock(String key, Long waitTime, Long leaseTime, TimeUnit timeUnit, Supplier<T> supplier) {
+    public <T> T executeWithLock(String key, Long waitTime, Long leaseTime, TimeUnit timeUnit, LockCallback<T> callback) throws Throwable{
 
         RLock lock = redissonClient.getLock(key);
         Boolean acquired = false;
@@ -29,7 +29,7 @@ public class PubSubLockService implements LockServiceTemplate {
                 throw new IllegalStateException("락 획득 실패: " + key);
             }
 
-            return supplier.get();
+            return callback.doInLock();
         }catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Lock acquisition interrupted for key: " + key, e);
@@ -42,7 +42,7 @@ public class PubSubLockService implements LockServiceTemplate {
     }
 
     @Override
-    public <T> T executeWithLockList(List<String> keys, Long waitTime, Long leaseTime, TimeUnit timeUnit, Supplier<T> supplier) {
+    public <T> T executeWithLockList(List<String> keys, Long waitTime, Long leaseTime, TimeUnit timeUnit, LockCallback<T> callback) throws Throwable{
 
 
         // 데드락 방지를 위해 키 정렬
@@ -69,7 +69,7 @@ public class PubSubLockService implements LockServiceTemplate {
             }
 
             // 모든 락을 획득한 상태에서 supplier 실행
-            return supplier.get();
+            return callback.doInLock();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("다중 락 획득 중 인터럽트 발생: " + keys, e);

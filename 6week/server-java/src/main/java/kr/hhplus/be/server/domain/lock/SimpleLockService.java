@@ -13,12 +13,12 @@ import java.util.function.Supplier;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SimpleLockService implements LockService {
+public class SimpleLockService implements LockServiceTemplate {
 
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
-    public <T> T executeWithLock(String key, Long waitTime, Long leaseTime, TimeUnit timeUnit ,Supplier<T> supplier) {
+    public <T> T executeWithLock(String key, Long waitTime, Long leaseTime, TimeUnit timeUnit ,LockCallback<T> callback) throws Throwable{
 
         boolean acquired = false;
         try {
@@ -30,7 +30,7 @@ public class SimpleLockService implements LockService {
                 throw new IllegalStateException("Failed to acquire Simple lock for key: " + key);
             }
 
-            return supplier.get();
+            return callback.doInLock();
         }finally{
             // 락 해제
             if (acquired) {
@@ -41,7 +41,7 @@ public class SimpleLockService implements LockService {
     }
 
     @Override
-    public <T> T executeWithLockList(List<String> keys, Long waitTime, Long leaseTime, TimeUnit timeUnit, Supplier<T> supplier) {
+    public <T> T executeWithLockList(List<String> keys, Long waitTime, Long leaseTime, TimeUnit timeUnit, LockCallback<T> callback) throws Throwable{
         // 데드락 방지를 위해 키 정렬
         keys.sort(String.CASE_INSENSITIVE_ORDER);
 
@@ -65,7 +65,7 @@ public class SimpleLockService implements LockService {
             }
 
             // 모든 락을 획득한 상태에서 supplier 실행
-            return supplier.get();
+            return callback.doInLock();
         } finally {
             // 모든 락 해제
             releaseAllLocks(acquiredLocks);
