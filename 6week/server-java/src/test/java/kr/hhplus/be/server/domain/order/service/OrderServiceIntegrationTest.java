@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("주문 서비스 통합테스트")
 class OrderServiceIntegrationTest extends IntegrationTest {
@@ -32,6 +31,7 @@ class OrderServiceIntegrationTest extends IntegrationTest {
     private OrderProductHistoryRepository historyRepository;
 
 
+    @Test
     @DisplayName("주문 생성 테스트")
     void 주문_생성(){
 
