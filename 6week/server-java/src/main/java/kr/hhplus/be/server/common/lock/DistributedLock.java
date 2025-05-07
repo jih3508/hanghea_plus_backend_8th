@@ -14,9 +14,9 @@ public @interface DistributedLock {
     /**
      * 락의 이름
      */
-    long key();
+    String key();
 
-    long[] keys() default {};
+    String[] keys() default {};
 
     LockType type();
 

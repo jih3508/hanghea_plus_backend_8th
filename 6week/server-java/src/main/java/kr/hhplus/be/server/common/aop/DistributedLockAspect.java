@@ -53,7 +53,7 @@ public class DistributedLockAspect {
         switch (lockType) {
             case PRODUCT ->{
                 List<String> keys = Arrays.stream(lockable.keys())
-                        .mapToObj(stockService::getStock)
+                        .map(key ->  stockService.getStock(Long.parseLong(key)))
                         .map(stock -> lockType.getCode() + stock.getId())
                         .toList();
 
