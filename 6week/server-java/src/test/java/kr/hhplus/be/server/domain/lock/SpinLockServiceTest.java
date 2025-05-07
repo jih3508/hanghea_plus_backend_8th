@@ -58,7 +58,7 @@ class SpinLockServiceTest {
 
     @Test
     @DisplayName(" 락 획득 및 Supplier 실행 기능을 검증")
-    void 락_획득() {
+    void 락_획득() throws Throwable {
         // given
         String result = "test result";
 
@@ -107,7 +107,7 @@ class SpinLockServiceTest {
                         return "Interrupted";
                     }
                 });
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 failCount.incrementAndGet();
             } finally {
                 latch.countDown();
@@ -132,7 +132,7 @@ class SpinLockServiceTest {
 
 
     @Test
-    void 디중_락() {
+    void 디중_락() throws Throwable {
         // given
         String result = "multiple locks result";
 

@@ -58,7 +58,7 @@ class PubSubLockServiceTest {
 
     @Test
     @DisplayName("다중 락 테스트")
-    void 다중_락() {
+    void 다중_락() throws Throwable {
         // given
         String result = "multiple locks result";
 
@@ -97,6 +97,8 @@ class PubSubLockServiceTest {
                     });
                 } catch (Exception e) {
                     failCount.incrementAndGet();
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
                 } finally {
                     latch.countDown();
                 }
@@ -125,17 +127,21 @@ class PubSubLockServiceTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    pubSubLockService.executeWithLockList(testKeys, 5000L, 10000L, TimeUnit.MILLISECONDS, () -> {
-                        try {
-                            // 짧은 시간 슬립하여 다른 스레드가 락 획득을 시도하도록 함
-                            Thread.sleep(100);
-                            successCount.incrementAndGet();
-                            return "success";
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return "interrupted";
-                        }
-                    });
+                    try {
+                        pubSubLockService.executeWithLockList(testKeys, 5000L, 10000L, TimeUnit.MILLISECONDS, () -> {
+                            try {
+                                // 짧은 시간 슬립하여 다른 스레드가 락 획득을 시도하도록 함
+                                Thread.sleep(100);
+                                successCount.incrementAndGet();
+                                return "success";
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                return "interrupted";
+                            }
+                        });
+                    } catch (Throwable e) {
+                        throw new RuntimeException(e);
+                    }
                 } finally {
                     latch.countDown();
                 }
@@ -168,7 +174,7 @@ class PubSubLockServiceTest {
                     }
                     return "locked";
                 });
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 // 무시
             }
         });

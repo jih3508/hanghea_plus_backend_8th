@@ -15,7 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,10 +45,10 @@ class SimpleLockServiceTest {
 
     @Test
     @DisplayName("심플락 획득 테스트")
-    void 락_획득(){
+    void 락_획득() throws Throwable {
         // Arrange
         String expectedResult = "Execution successful";
-        Supplier<String> supplier = () -> expectedResult;
+        LockCallback<String> supplier = () -> expectedResult;
 
         // Act
         String result = lockService.executeWithLock(testLockKey, 1L, 10L, TimeUnit.SECONDS, supplier);
@@ -86,6 +85,8 @@ class SimpleLockServiceTest {
                 });
             } catch (Exception e) {
                 failCount.incrementAndGet();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
             } finally {
                 latch.countDown();
             }
