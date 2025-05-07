@@ -468,4 +468,53 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
         assertThat(result.getQuantity()).isEqualTo(quantity - numberOfThreads);
 
     }
+
+
+    @Test
+    @DisplayName("분산락 적용 테스트 -> 쿠폰 10명한테 동시에 발급되면 5명 초과가 나서 발급 안되도록 해야 한다.")
+    void 분산락_적용_쿠폰_발급_초과() throws InterruptedException {
+        // given
+        int quantity = 5;
+        CreateCoupon createCoupon1 = CreateCoupon.builder()
+                .couponNumber(UUID.randomUUID().toString())
+                .type(CouponType.FLAT)
+                .discountPrice(BigDecimal.valueOf(10_000))
+                .startDateTime(LocalDateTime.now().minusDays(1))
+                .endDateTime(LocalDateTime.now().plusDays(30))
+                .quantity(quantity)
+                .build();
+
+        AtomicInteger successCount = new AtomicInteger(0);
+        AtomicInteger failCount = new AtomicInteger(0);
+
+        DomainCoupon coupon1 = couponRepository.create(createCoupon1);
+        int numberOfThreads = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        // when
+        for (int i = 0; i < numberOfThreads; i++) {
+            executorService.submit(() -> {
+                try {
+                    Long userId = users.get((int) (Math.random() % users.size())).getId();
+                    facade.issue(CouponIssueCommand.of(userId, coupon1.getId()));
+                    successCount.incrementAndGet();
+                }catch (Exception e){
+                    failCount.incrementAndGet();
+                }
+                finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        // then
+        DomainCoupon result = couponRepository.findById(coupon1.getId()).get();
+        assertThat(result.getQuantity()).isEqualTo(0);
+        assertThat(successCount.get()).isEqualTo(5);
+        assertThat(failCount.get()).isEqualTo(5);
+
+    }
 }
