@@ -8,7 +8,6 @@ import kr.hhplus.be.server.domain.order.model.DomainOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrderItem;
 import kr.hhplus.be.server.domain.order.repository.OrderProductHistoryRepository;
 import kr.hhplus.be.server.domain.order.repository.OrderRepository;
-import kr.hhplus.be.server.domain.point.model.CreatePoint;
 import kr.hhplus.be.server.domain.point.model.DomainPoint;
 import kr.hhplus.be.server.domain.point.repository.PointRepository;
 import kr.hhplus.be.server.domain.product.model.*;
@@ -21,6 +20,7 @@ import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
 import kr.hhplus.be.server.domain.user.repository.UserCouponRepository;
 import kr.hhplus.be.server.domain.user.repository.UserRepository;
 import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
+import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.support.IntegrationTest;
 import org.junit.jupiter.api.AfterEach;
@@ -34,6 +34,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +45,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("주문 파사드 동시성 테스트")
 class OrderFacadeConcurrencyTest extends IntegrationTest {
@@ -88,6 +88,14 @@ class OrderFacadeConcurrencyTest extends IntegrationTest {
     private ExecutorService executorService;
     private CountDownLatch latch;
 
+    private User user1;
+
+    private User user2;
+
+    private DomainProductStock product1;
+
+    private DomainProductStock product2;
+
     @BeforeEach
     void setUp() {
         // 동시 실행을 위한 스레드풀 및 래치 설정
@@ -97,30 +105,42 @@ class OrderFacadeConcurrencyTest extends IntegrationTest {
         // 테스트용 사용자 생성
         transactionTemplate.execute(status -> {
             CreateUser createUser = CreateUser.builder()
-                    .name("동시성테스트유저")
-                    .id("concurrencyuser")
+                    .name("동시성테스트유저1")
+                    .id("concurrency user1")
                     .build();
-            User user = userRepository.create(createUser);
+            user1 = userRepository.create(createUser);
 
             // 포인트 설정Decimal(100_000))
-            pointRepository.create(1L);
+            pointRepository.create(user1.getId(), BigDecimal.valueOf(1_000_000_000));
 
-            // 테스트용 상품 생성
-            CreateProduct createLimitedProduct = CreateProduct.builder()
-                    .name("한정수량상품")
-                    .price(new BigDecimal(10_000))
+            createUser = CreateUser.builder()
+                    .name("동시성테스트유저2")
+                    .id("concurrency user2")
                     .build();
-            DomainProduct limitedProduct = productRepository.create(createLimitedProduct);
+            user2 = userRepository.create(createUser);
+            pointRepository.create(user2.getId(), BigDecimal.valueOf(1_000_000_000));
 
-            // 한정 수량 재고 설정
-            CreateProductStock createLimitedStock = CreateProductStock.builder()
-                    .productId(limitedProduct.getId())
-                    .quantity(5) // 5개만 있는 한정 상품
-                    .build();
-            productStockRepository.create(createLimitedStock);
+            product1 = createProduct("맥북", BigDecimal.valueOf(1_000_000), ProductCategory.ELECTRONIC_DEVICES ,10);
+            product2 = createProduct("순대", BigDecimal.valueOf(5_000), ProductCategory.FOOD, 20);
 
             return null;
         });
+    }
+
+    DomainProductStock createProduct(String name, BigDecimal price, ProductCategory category, Integer quantity) {
+        CreateProduct createProduct = CreateProduct.builder()
+                .name(name)
+                .productNumber(UUID.randomUUID().toString())
+                .price(price)
+                .category(category)
+                .build();
+        DomainProduct limitedProduct = productRepository.create(createProduct);
+        // 한정 수량 재고 설정
+        CreateProductStock createStock = CreateProductStock.builder()
+                .productId(limitedProduct.getId())
+                .quantity(quantity) // 5개만 있는 한정 상품
+                .build();
+        return productStockRepository.create(createStock);
     }
 
     @AfterEach
@@ -512,5 +532,140 @@ class OrderFacadeConcurrencyTest extends IntegrationTest {
         // 실제 생성된 주문 수는 성공한 주문 수와 일치해야 함
         assertThat(ordersForErrorProduct).isEqualTo(successfulOrders);
     }
+
+    @Test
+    @DisplayName("재고 분산락 적용 테스트 -> 재고 부족")
+    void 재고_분산락_재고_부족() throws InterruptedException {
+        //given
+        OrderCommand orderCommand1 = OrderCommand.builder()
+                .userId(user1.getId())
+                .items(List.of(OrderCommand.OrderItem.builder()
+                                .productId(product1.getProductId())
+                                .quantity(5)
+                                .build(),
+                        OrderCommand.OrderItem.builder()
+                                .productId(product2.getProductId())
+                                .quantity(10)
+                                .build()
+                )).build();
+
+        OrderCommand orderCommand2 = OrderCommand.builder()
+                .userId(user2.getId())
+                .items(List.of(OrderCommand.OrderItem.builder()
+                                .productId(product1.getProductId())
+                                .quantity(5)
+                                .build(),
+                        OrderCommand.OrderItem.builder()
+                                .productId(product2.getProductId())
+                                .quantity(20)
+                                .build()
+                )).build();
+
+        int numberOfThreads = 2;
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        AtomicInteger failureCount = new AtomicInteger(0);
+
+        // when
+        executorService.submit(() -> {
+            try {
+                facade.order(orderCommand1);
+            }catch (Exception e){
+                failureCount.incrementAndGet();
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        executorService.submit(() -> {
+            try {
+                facade.order(orderCommand2);
+            }catch (Exception e){
+                failureCount.incrementAndGet();
+            } finally {
+                latch.countDown();
+            }
+
+        });
+
+        latch.await();
+        executorService.shutdown();
+
+        //then
+        DomainProductStock stock1 =  productStockRepository.findByProductId(product1.getProductId()).get();
+        DomainProductStock stock2 =  productStockRepository.findByProductId(product2.getProductId()).get();
+        log.info(stock1.toString());
+        log.info(stock2.toString());
+
+        assertThat(failureCount.get()).isGreaterThan(1);
+
+
+    }
+
+    @Test
+    @DisplayName("재고 분산락 적용 테스트")
+    void 재고_분산락() throws InterruptedException {
+        //given
+        OrderCommand orderCommand1 = OrderCommand.builder()
+                .userId(user1.getId())
+                .items(List.of(OrderCommand.OrderItem.builder()
+                        .productId(product1.getProductId())
+                        .quantity(5)
+                        .build(),
+                        OrderCommand.OrderItem.builder()
+                                .productId(product2.getProductId())
+                                .quantity(10)
+                                .build()
+                        )).build();
+
+        OrderCommand orderCommand2 = OrderCommand.builder()
+                .userId(user2.getId())
+                .items(List.of(OrderCommand.OrderItem.builder()
+                                .productId(product1.getProductId())
+                                .quantity(5)
+                                .build(),
+                        OrderCommand.OrderItem.builder()
+                                .productId(product2.getProductId())
+                                .quantity(10)
+                                .build()
+                )).build();
+
+        int numberOfThreads = 2;
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        // when
+        executorService.submit(() -> {
+            try {
+                facade.order(orderCommand1);
+            }finally {
+                latch.countDown();
+            }
+        });
+
+        executorService.submit(() -> {
+            try {
+                facade.order(orderCommand2);
+            }finally {
+                latch.countDown();
+            }
+
+        });
+
+        latch.await();
+        executorService.shutdown();
+
+        //then
+        DomainProductStock stock1 =  productStockRepository.findByProductId(product1.getProductId()).get();
+        DomainProductStock stock2 =  productStockRepository.findByProductId(product2.getProductId()).get();
+
+        log.info(stock1.toString());
+        log.info(stock2.toString());
+        assertThat(stock1.getQuantity()).isEqualTo(0);
+        assertThat(stock2.getQuantity()).isEqualTo(0);
+
+
+    }
+
 
 }

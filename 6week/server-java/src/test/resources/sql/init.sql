@@ -142,7 +142,7 @@ create table order_product_history
     order_id   bigint null comment '주문 FK',
     product_id bigint not null comment '상품 fk',
     quantity   int    not null comment '수량',
-    created_date_time datetime default CURRENT_TIMESTAMP not null
+    create_date_time datetime default CURRENT_TIMESTAMP not null
 )
     comment '주문 상품 이력';
 

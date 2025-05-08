@@ -1,15 +1,18 @@
 package kr.hhplus.be.server.application.product;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import kr.hhplus.be.server.domain.product.model.DomainProductRank;
-import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
 import lombok.*;
+
+import java.io.Serializable;
 
 @Getter
 @Setter
 @ToString
 @Builder
 @AllArgsConstructor
-public class ProductRankCommand {
+public class ProductRankCommand implements Serializable {
 
     private Long productId;
 

@@ -47,6 +47,13 @@ public class Point {
                 .build();
     }
 
+    public static Point create(User user, BigDecimal point) {
+        return Point.builder()
+                .user(user)
+                .point(point)
+                .build();
+    }
+
     public void charge(BigDecimal amount) {
         this.point = this.point.add(amount);
 

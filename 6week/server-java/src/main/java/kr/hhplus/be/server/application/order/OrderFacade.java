@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.application.order;
 
 import jakarta.transaction.Transactional;
+import kr.hhplus.be.server.common.lock.DistributedLock;
+import kr.hhplus.be.server.common.lock.LockStrategy;
+import kr.hhplus.be.server.common.lock.LockType;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
@@ -20,6 +23,7 @@ import kr.hhplus.be.server.domain.user.service.UserService;
 import kr.hhplus.be.server.infrastructure.order.entity.OrderItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -50,17 +54,16 @@ public class OrderFacade {
 
     private final ProductRankService productRankService;
 
-
+    @DistributedLock(key = "#command.getProductIdsAsString()", type = LockType.STOCK, strategy = LockStrategy.PUB_SUB_LOCK)
     @Transactional
     public void order(OrderCommand command){
 
         DomainUser user = userService.findById(command.getUserId());
 
-        // 주문 처리
-        List<OrderItem> items = new LinkedList<>();
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         CreateOrder createOrder = new CreateOrder(command.getUserId(), createOrderNumber());
+
 
         for(OrderCommand.OrderItem item : command.getItems()){
 
@@ -83,13 +86,12 @@ public class OrderFacade {
         // 결제 처리
         if(order.getTotalPrice().compareTo(totalPrice) > 0){
             pointService.use(command.getUserId(), totalPrice);
-            pointHistoryService.useHistory(null, totalPrice);
+            pointHistoryService.useHistory(command.getUserId(), totalPrice);
         }
 
         // 외부 데이터 전송
         externalTransmissionService.sendOrderData();
     }
-
 
 
     /*
@@ -101,6 +103,11 @@ public class OrderFacade {
         return String.format("{0}{1}{2}%08d", now.getYear(), now.getMonth(), now.getDayOfMonth(), (int)(Math.random() * 1_000_000_000) + 1);
     }
 
+    /**
+     * 주문 랭킹 업데이트 후 캐시 무효화
+     * 랭킹 데이터를 업데이트한 후 캐시를 삭제하여 다음 요청 시 최신 데이터가 조회되도록 함
+     */
+    @CacheEvict(value = "productRanks", key = "'today'")
     public void updateRank(){
         List<OrderHistoryProductGroupVo> list = service.threeDaysOrderProductHistory();
         int size = list.size();

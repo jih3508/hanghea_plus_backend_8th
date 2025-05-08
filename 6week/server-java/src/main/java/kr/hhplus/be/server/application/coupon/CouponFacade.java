@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.application.coupon;
 
+import kr.hhplus.be.server.common.lock.DistributedLock;
+import kr.hhplus.be.server.common.lock.LockStrategy;
+import kr.hhplus.be.server.common.lock.LockType;
 import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
 import kr.hhplus.be.server.domain.coupon.service.CouponService;
 import kr.hhplus.be.server.domain.user.model.DomainUser;
@@ -28,7 +31,8 @@ public class CouponFacade {
      * method: issue
      * description: 쿠폰발급
      */
-    @Transactional(rollbackFor =  Exception.class)
+    @DistributedLock(key = "#command.getCouponId()", type = LockType.COUPON , strategy = LockStrategy.PUB_SUB_LOCK)
+    @Transactional
     public void issue(CouponIssueCommand command) {
 
         DomainUser user = userService.findById(command.getUserId());
