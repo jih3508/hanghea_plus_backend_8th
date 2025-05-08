@@ -11,6 +11,7 @@ import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,7 +45,7 @@ public class ProductFacade {
      * method: todayProductRank
      * description: 상품 랭크 리스트
      */
-
+    @Cacheable(value = "productRanks", key = "'today'")
     public List<ProductRankCommand> todayProductRank(){
 
         List<DomainProductRank> rank =  rankService.todayProductRank();
