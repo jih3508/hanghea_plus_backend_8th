@@ -148,11 +148,12 @@ create table order_product_history
 
 create table product_rank
 (
-    id         bigint auto_increment comment 'PK'
+    id             bigint auto_increment comment 'PK'
         primary key,
-    product_id bigint not null comment '상품 fk',
-    rank_date  date   not null,
-    `rank`     int    not null comment '순위',
+    product_id     bigint not null comment '상품 fk',
+    rank_date      date   not null,
+    `rank`         int    not null comment '순위',
+    total_quantity int    null comment '총판매 수량',
     constraint product_rank_product_fk
         foreign key (product_id) references product (id)
 )

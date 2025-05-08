@@ -7,9 +7,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +23,14 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")
 class ProductFacadeCacheTest{
 
+    private static final Logger log = LoggerFactory.getLogger(ProductFacadeCacheTest.class);
     @Autowired
     private ProductFacade productFacade;
 
     @Autowired
     private RedisCleanup redisCleanup;
 
-    @Mock
+    @MockitoBean
     private ProductRankService productRankService;
 
     @BeforeEach
@@ -44,12 +48,12 @@ class ProductFacadeCacheTest{
         // when: 동일한 메서드를 여러 번 호출
         productFacade.todayProductRank(); // 첫 번째 호출 - 캐시 저장
         productFacade.todayProductRank(); // 두 번째 호출 - 캐시에서 조회
-        productFacade.todayProductRank(); // 세 번째 호출 - 캐시에서 조회
+        List<ProductRankCommand> result = productFacade.todayProductRank(); // 세 번째 호출 - 캐시에서 조회
+
+        log.info(result.toString());
 
         // then: 서비스는 한 번만 호출되어야 함 (캐시가 적용되었기 때문)
         verify(productRankService, times(1)).todayProductRank();
     }
-
-
 
 }
