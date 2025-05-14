@@ -26,6 +26,7 @@ public class AuthenticationFilter implements Filter {
     // 인증이 필요 없는 경로 목록
     private static final List<String> PUBLIC_PATHS = Arrays.asList(
             "/api/products", // 상품 조회 API
+            "/api/products/top", // 상품 조회 API
             "/api/swagger-ui", // Swagger UI
             "/api/v3/api-docs", // OpenAPI 문서
             "/actuator" // 모니터링 엔드포인트

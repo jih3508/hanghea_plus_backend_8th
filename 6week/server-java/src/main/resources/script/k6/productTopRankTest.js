@@ -10,7 +10,7 @@ export let options = {
 };
 
 export default function() {
-    let res = http.get('${BASE_URL}/api/products/top');
+    let res = http.get(`${BASE_URL}/api/products/top`);
 
     check(res, {
         'status is 200': (r) => r.status === 200,

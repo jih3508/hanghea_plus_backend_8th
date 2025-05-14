@@ -1,7 +1,5 @@
 package kr.hhplus.be.server.application.product;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import kr.hhplus.be.server.domain.product.model.DomainProductRank;
 import lombok.*;
 
@@ -25,7 +23,7 @@ public class ProductRankCommand implements Serializable {
 
     public static ProductRankCommand from(DomainProductRank productRank){
         return ProductRankCommand.builder()
-                .productId(productRank.getId())
+                .productId(productRank.getProductId())
                 .name(productRank.getProductName())
                 .rank(productRank.getRank())
                 .totalQuantity(productRank.getTotalQuantity())

@@ -1,13 +1,11 @@
 package kr.hhplus.be.server.interfaces.api.common;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.http.HttpStatus;
 
 import java.util.Map;
 
+@Getter
 @ToString
 @Builder
 @AllArgsConstructor

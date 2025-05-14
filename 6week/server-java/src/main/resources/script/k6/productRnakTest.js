@@ -11,6 +11,6 @@ export const options = {
 };
 
 export default function() {
-    http.get('http://localhost:8080/products/today-ranks');
+    http.get('http://localhost:8080/products/top');
     sleep(1);
 }
