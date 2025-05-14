@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Target(ElementType.METHOD)
@@ -13,7 +14,9 @@ public @interface DistributedLock {
     /**
      * 락의 이름
      */
-    long key();
+    String key() default "";
+
+    String[] keys() default {};
 
     LockType type();
 
@@ -33,5 +36,7 @@ public @interface DistributedLock {
      * 락을 획득한 이후 leaseTime 이 지나면 락을 해제한다
      */
     long leaseTime() default 3L;
+
+    LockStrategy strategy() default LockStrategy.SIMPLE_LOCK;
 
 }

@@ -35,6 +35,10 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 
+	// redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("org.redisson:redisson-spring-boot-starter:3.46.0")
+
 	// lombok
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
@@ -62,7 +66,7 @@ dependencies{
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mysql")
-	testImplementation("io.rest-assured:rest-assured:4.4.0")
+	testImplementation("io.rest-assured:rest-assured:5.5.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

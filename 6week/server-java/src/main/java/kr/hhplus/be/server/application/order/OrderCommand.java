@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -44,6 +45,18 @@ public class OrderCommand {
                .userId(userId)
                .items(list)
                .build();
+    }
+
+    public String[] getProductIds(){
+        return items.stream()
+                .map(item -> String.valueOf(item.getProductId()))
+                .toArray(String[]::new);
+    }
+
+    public String getProductIdsAsString() {
+        return items.stream()
+                .map(item -> String.valueOf(item.getProductId()))
+                .collect(Collectors.joining(","));
     }
 
 }

@@ -6,6 +6,7 @@ import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
 import kr.hhplus.be.server.domain.coupon.service.CouponService;
 import kr.hhplus.be.server.domain.user.model.CreateUser;
 import kr.hhplus.be.server.domain.user.model.CreateUserCoupon;
+import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
 import kr.hhplus.be.server.domain.user.repository.UserCouponRepository;
 import kr.hhplus.be.server.domain.user.repository.UserRepository;
@@ -47,9 +48,6 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
     private CouponService couponService;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private UserCouponService userCouponService;
 
     @Autowired
@@ -67,11 +65,31 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
     private ExecutorService executorService;
     private CountDownLatch latch;
 
+    private User user1;
+    private List<User> users;
+
     @BeforeEach
     void setUp() {
         // 동시 실행을 위한 스레드풀 및 래치 설정
+        users = new ArrayList<>();
         executorService = Executors.newFixedThreadPool(10);
         latch = new CountDownLatch(1);
+
+        user1 = createUser("test1", "홍길동");
+        users.add(user1);
+        users.add(createUser("test2", "이순신"));
+        users.add(createUser("test3", "강감찬"));
+
+
+    }
+
+    User createUser(String id, String name) {
+        return userRepository.create(
+                CreateUser.builder()
+                        .id(id)
+                        .name(name)
+                        .build()
+        );
     }
 
     @AfterEach
@@ -410,5 +428,93 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
 
             assertThat(couponIds).containsExactlyInAnyOrderElementsOf(expectedCouponIds);
         }
+    }
+
+    @Test
+    @DisplayName("분산락 적용 테스트 -> 쿠폰 10명한테 동시에 발급되면 결과는 10개가 나와야 한다.")
+    void 분산락_적용_쿠폰_발급() throws InterruptedException {
+        // given
+        int quantity = 20;
+        CreateCoupon createCoupon1 = CreateCoupon.builder()
+                .couponNumber(UUID.randomUUID().toString())
+                .type(CouponType.FLAT)
+                .discountPrice(BigDecimal.valueOf(10_000))
+                .startDateTime(LocalDateTime.now().minusDays(1))
+                .endDateTime(LocalDateTime.now().plusDays(30))
+                .quantity(quantity)
+                .build();
+
+        DomainCoupon coupon1 = couponRepository.create(createCoupon1);
+        int numberOfThreads = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        // when
+        for (int i = 0; i < numberOfThreads; i++) {
+            executorService.submit(() -> {
+                try {
+                    Long userId = users.get((int) (Math.random() % users.size())).getId();
+                    facade.issue(CouponIssueCommand.of(userId, coupon1.getId()));
+                }finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        // then
+        DomainCoupon result = couponRepository.findById(coupon1.getId()).get();
+        assertThat(result.getQuantity()).isEqualTo(quantity - numberOfThreads);
+
+    }
+
+
+    @Test
+    @DisplayName("분산락 적용 테스트 -> 쿠폰 10명한테 동시에 발급되면 5명 초과가 나서 발급 안되도록 해야 한다.")
+    void 분산락_적용_쿠폰_발급_초과() throws InterruptedException {
+        // given
+        int quantity = 5;
+        CreateCoupon createCoupon1 = CreateCoupon.builder()
+                .couponNumber(UUID.randomUUID().toString())
+                .type(CouponType.FLAT)
+                .discountPrice(BigDecimal.valueOf(10_000))
+                .startDateTime(LocalDateTime.now().minusDays(1))
+                .endDateTime(LocalDateTime.now().plusDays(30))
+                .quantity(quantity)
+                .build();
+
+        AtomicInteger successCount = new AtomicInteger(0);
+        AtomicInteger failCount = new AtomicInteger(0);
+
+        DomainCoupon coupon1 = couponRepository.create(createCoupon1);
+        int numberOfThreads = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        // when
+        for (int i = 0; i < numberOfThreads; i++) {
+            executorService.submit(() -> {
+                try {
+                    Long userId = users.get((int) (Math.random() % users.size())).getId();
+                    facade.issue(CouponIssueCommand.of(userId, coupon1.getId()));
+                    successCount.incrementAndGet();
+                }catch (Exception e){
+                    failCount.incrementAndGet();
+                }
+                finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        // then
+        DomainCoupon result = couponRepository.findById(coupon1.getId()).get();
+        assertThat(result.getQuantity()).isEqualTo(0);
+        assertThat(successCount.get()).isEqualTo(5);
+        assertThat(failCount.get()).isEqualTo(5);
+
     }
 }

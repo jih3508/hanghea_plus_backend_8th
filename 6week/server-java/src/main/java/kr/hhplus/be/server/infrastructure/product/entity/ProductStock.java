@@ -34,33 +34,6 @@ public class ProductStock {
         this.quantity = quantity;
     }
 
-    /*
-     * method: isStock
-     * description: 재고 여부
-     */
-    public Boolean isStock(){
-        return quantity > 0;
-    }
-
-    /*
-     * method: stockReceiving
-     * description: 재고 입고
-     */
-    public void stockReceiving(Integer quantity){
-        this.quantity += quantity;
-    }
-
-    /*
-     * method: stockDelivering
-     * description: 재고 출납
-     */
-    public void stockDelivering(Integer quantity){
-        if(this.quantity - quantity < 0){
-            throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "제고가 부족 합니다.");
-        }
-
-        this.quantity -= quantity;
-    }
 
     public static ProductStock create(CreateProductStock stock, Product product) {
         return ProductStock.builder()

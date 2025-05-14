@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Component
@@ -32,6 +33,14 @@ public class PointRepositoryImpl implements PointRepository {
     public DomainPoint create(Long userId) {
         return userJpaRepository.findById(userId)
                 .map(user ->  jpaRepository.save(Point.create(user)))
+                .map(Point::toDomain)
+                .orElse(null);
+    }
+
+    @Override
+    public DomainPoint create(Long userId, BigDecimal point) {
+        return userJpaRepository.findById(userId)
+                .map(user ->  jpaRepository.save(Point.create(user, point)))
                 .map(Point::toDomain)
                 .orElse(null);
     }
