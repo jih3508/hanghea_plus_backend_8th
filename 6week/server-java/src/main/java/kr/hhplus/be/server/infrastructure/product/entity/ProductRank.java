@@ -23,12 +23,13 @@ public class ProductRank {
     @JoinColumn(name ="product_id")
     private Product product;
 
-    @Column(name = "rankDate")
+    @Column(name = "rank_date")
     @CreatedDate
     private LocalDate rankDate;
 
     private Integer rank;
 
+    @Column(name = "total_quantity")
     private Integer totalQuantity;
 
     @Builder

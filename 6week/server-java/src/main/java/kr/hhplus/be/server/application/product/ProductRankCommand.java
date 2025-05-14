@@ -1,15 +1,16 @@
 package kr.hhplus.be.server.application.product;
 
 import kr.hhplus.be.server.domain.product.model.DomainProductRank;
-import kr.hhplus.be.server.infrastructure.product.entity.ProductRank;
 import lombok.*;
+
+import java.io.Serializable;
 
 @Getter
 @Setter
 @ToString
 @Builder
 @AllArgsConstructor
-public class ProductRankCommand {
+public class ProductRankCommand implements Serializable {
 
     private Long productId;
 
@@ -22,7 +23,7 @@ public class ProductRankCommand {
 
     public static ProductRankCommand from(DomainProductRank productRank){
         return ProductRankCommand.builder()
-                .productId(productRank.getId())
+                .productId(productRank.getProductId())
                 .name(productRank.getProductName())
                 .rank(productRank.getRank())
                 .totalQuantity(productRank.getTotalQuantity())
