@@ -3,7 +3,6 @@ package kr.hhplus.be.server.domain.product.repository;
 import kr.hhplus.be.server.domain.product.model.DomainProductRank;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -22,11 +21,12 @@ public interface ProductRankRedisRepository {
     
     /**
      * 특정 날짜의 상위 랭킹 상품 조회
-     * @param date 해당 날짜 (yyyyMMdd 형식)
+     *
+     * @param date  해당 날짜 (yyyyMMdd 형식)
      * @param count 가져올 상품 수
      * @return 상위 랭킹 상품 목록
      */
-    Set<TypedTuple<String>> getTopProducts(String date, long count);
+    Set<TypedTuple<Object>> getTopProducts(String date, long count);
     
     /**
      * 여러 날짜의 랭킹 정보를 합산하여 조회
