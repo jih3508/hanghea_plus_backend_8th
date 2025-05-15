@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.coupon;
 
+import kr.hhplus.be.server.common.util.RedisKeysPrefix;
 import kr.hhplus.be.server.domain.coupon.model.CreateCoupon;
 import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -67,6 +69,11 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
 
     private User user1;
     private List<User> users;
+
+    @Autowired
+    private RedisTemplate<String, Long> redisTemplate;
+
+    private final String redisKey = RedisKeysPrefix.COUPON_KEY_PREFIX;
 
     @BeforeEach
     void setUp() {
@@ -125,6 +132,8 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
             return coupon.getId();
         });
 
+        redisTemplate.opsForValue().set(redisKey + limitedCouponId, 10L);
+
         // 20명의 사용자가 동시에 10개의 한정 쿠폰을 신청
         int concurrentRequests = 20;
         AtomicInteger successCount = new AtomicInteger(0);
@@ -174,9 +183,9 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
         // 총 발급 시도는 20개
         assertThat(successCount.get() + failureCount.get()).isEqualTo(20);
 
-        // 데이터베이스에서 실제 쿠폰 남은 수량 확인
-        DomainCoupon coupon = couponService.getCoupon(limitedCouponId);
-        assertThat(coupon.getQuantity()).isEqualTo(0); // 모든 쿠폰이 소진되어야 함
+        // 레디스에서 실제 쿠폰 남은 수량 확인
+        long count = redisTemplate.opsForValue().get(redisKey + limitedCouponId);
+        assertThat(count).isLessThan(0); // 모든 쿠폰이 소진되어야 함
 
         // 사용자에게 발급된 쿠폰 수 확인
         List<DomainUserCoupon> userCoupons = userCouponService.getUserCoupons(userId);
@@ -214,6 +223,8 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
             DomainCoupon coupon = couponRepository.create(createCoupon);
             return coupon.getId();
         });
+
+        redisTemplate.opsForValue().set(redisKey + limitedCouponId, 5L);
 
         // 10명의 사용자가 동시에 5개의 한정 쿠폰을 신청
         int concurrentUsers = userIds.size();
@@ -267,8 +278,12 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
         assertThat(successCount + failureCount).isEqualTo(10);
 
         // 데이터베이스에서 실제 쿠폰 남은 수량 확인
-        DomainCoupon coupon = couponService.getCoupon(limitedCouponId);
-        assertThat(coupon.getQuantity()).isEqualTo(0); // 모든 쿠폰이 소진되어야 함
+        //DomainCoupon coupon = couponService.getCoupon(limitedCouponId);
+        //assertThat(coupon.getQuantity()).isEqualTo(0); // 모든 쿠폰이 소진되어야 함
+
+        // 레디스에서 실제 쿠폰 남은 수량 확인
+        long count = redisTemplate.opsForValue().get(redisKey + limitedCouponId);
+        assertThat(count).isLessThan(0); // 모든 쿠폰이 소진되어야 함
 
         // 각 사용자별 쿠폰 발급 확인
         for (Long userId : userIds) {
@@ -434,7 +449,7 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
     @DisplayName("분산락 적용 테스트 -> 쿠폰 10명한테 동시에 발급되면 결과는 10개가 나와야 한다.")
     void 분산락_적용_쿠폰_발급() throws InterruptedException {
         // given
-        int quantity = 20;
+        Integer quantity = 20;
         CreateCoupon createCoupon1 = CreateCoupon.builder()
                 .couponNumber(UUID.randomUUID().toString())
                 .type(CouponType.FLAT)
@@ -445,6 +460,8 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
                 .build();
 
         DomainCoupon coupon1 = couponRepository.create(createCoupon1);
+
+        redisTemplate.opsForValue().set(redisKey + coupon1.getId(), quantity.longValue());
         int numberOfThreads = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
@@ -465,7 +482,10 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
 
         // then
         DomainCoupon result = couponRepository.findById(coupon1.getId()).get();
-        assertThat(result.getQuantity()).isEqualTo(quantity - numberOfThreads);
+
+        // 레디스에서 실제 쿠폰 남은 수량 확인
+        long count = redisTemplate.opsForValue().get(redisKey + coupon1.getId());
+        assertThat(count).isEqualTo(quantity - numberOfThreads);
 
     }
 
@@ -474,7 +494,7 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
     @DisplayName("분산락 적용 테스트 -> 쿠폰 10명한테 동시에 발급되면 5명 초과가 나서 발급 안되도록 해야 한다.")
     void 분산락_적용_쿠폰_발급_초과() throws InterruptedException {
         // given
-        int quantity = 5;
+        Integer quantity = 5;
         CreateCoupon createCoupon1 = CreateCoupon.builder()
                 .couponNumber(UUID.randomUUID().toString())
                 .type(CouponType.FLAT)
@@ -488,6 +508,8 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
         AtomicInteger failCount = new AtomicInteger(0);
 
         DomainCoupon coupon1 = couponRepository.create(createCoupon1);
+
+        redisTemplate.opsForValue().set(redisKey + coupon1.getId(), quantity.longValue());
         int numberOfThreads = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
@@ -511,8 +533,9 @@ class CouponFacadeConcurrencyTest extends IntegrationTest {
         latch.await();
 
         // then
-        DomainCoupon result = couponRepository.findById(coupon1.getId()).get();
-        assertThat(result.getQuantity()).isEqualTo(0);
+        //DomainCoupon result = couponRepository.findById(coupon1.getId()).get();
+        long count = redisTemplate.opsForValue().get(redisKey + coupon1.getId());
+        assertThat(count).isEqualTo(0);
         assertThat(successCount.get()).isEqualTo(5);
         assertThat(failCount.get()).isEqualTo(5);
 

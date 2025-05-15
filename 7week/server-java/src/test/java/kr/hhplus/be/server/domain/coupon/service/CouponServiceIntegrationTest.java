@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.coupon.service;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.common.util.RedisKeysPrefix;
 import kr.hhplus.be.server.domain.coupon.model.CreateCoupon;
 import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,6 +35,11 @@ class CouponServiceIntegrationTest extends IntegrationTest {
 
     @Autowired
     private CouponRepository repository;
+
+    @Autowired
+    private RedisTemplate<String, Long> redisTemplate;
+
+    private final String redisKey = RedisKeysPrefix.COUPON_KEY_PREFIX;
 
     @BeforeEach
     void setUp() {
@@ -90,6 +97,7 @@ class CouponServiceIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("발급시 발급 불가능 한 쿠폰을 발급 할때")
     void 발급_쿠폰X(){
+
         //given
         Long couponId = 1L;
 
@@ -116,5 +124,51 @@ class CouponServiceIntegrationTest extends IntegrationTest {
         assertThat(result.getQuantity()).isEqualTo(coupon.getQuantity());
 
     }
+
+    @Test
+    @DisplayName("쿠폰 개수가 부족할때 테스트")
+    void 발급_쿠폰_개수_부족(){
+
+        //given
+        Long couponId = 1L;
+        redisTemplate.opsForValue().set(RedisKeysPrefix.COUPON_KEY_PREFIX + couponId, 0L);
+
+        //when
+        assertThatThrownBy(() -> service.checkCouponCounter(couponId))
+                .isInstanceOf(ApiExceptionResponse.class)
+                .hasMessage("쿠폰 개수가 부족합니다.");
+    }
+
+    @Test
+    @DisplayName("쿠폰 개수가 있을때 쿠폰을 차감 시킨다.")
+    void 발급_쿠폰_개수_충분(){
+        //given
+        Long couponId = 1L;
+        redisTemplate.opsForValue().set(RedisKeysPrefix.COUPON_KEY_PREFIX + couponId, 100L);
+
+        //when
+        service.checkCouponCounter(couponId);
+
+        //then
+        Long count = redisTemplate.opsForValue().get(RedisKeysPrefix.COUPON_KEY_PREFIX + couponId);
+        assertThat(count).isEqualTo(99L);
+    }
+
+    @Test
+    @DisplayName("쿠폰 원복 -> 개수 증가 테스트")
+    void 발급_쿠폰_개수_증가(){
+        //given
+        Long couponId = 1L;
+        redisTemplate.opsForValue().set(RedisKeysPrefix.COUPON_KEY_PREFIX + couponId, 100L);
+
+        // when
+        service.resetCouponCounter(couponId);
+
+
+        // then
+        Long count = redisTemplate.opsForValue().get(RedisKeysPrefix.COUPON_KEY_PREFIX + couponId);
+        assertThat(count).isEqualTo(101L);
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.coupon;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.common.util.RedisKeysPrefix;
 import kr.hhplus.be.server.domain.coupon.model.CreateCoupon;
 import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -47,6 +49,11 @@ class CouponFacadeIntegrationTest extends IntegrationTest {
 
     @Autowired
     private UserCouponRepository userCouponRepository;
+
+    @Autowired
+    private RedisTemplate<String, Long> redisTemplate;
+
+    private final String redisKey = RedisKeysPrefix.COUPON_KEY_PREFIX;
 
     @BeforeEach
     void setUp() {
@@ -94,9 +101,12 @@ class CouponFacadeIntegrationTest extends IntegrationTest {
                 .endDateTime(LocalDateTime.of(2025, 12, 30, 12, 12))
                 .build();
 
-        couponRepository.create(zeroCoupon);
-        couponRepository.create(normalCoupon);
-        couponRepository.create(rateCoupon);
+        Long couponId = couponRepository.create(zeroCoupon).getId();
+        redisTemplate.opsForValue().set(redisKey + couponId, 0L);
+        couponId = couponRepository.create(normalCoupon).getId();
+        redisTemplate.opsForValue().set(redisKey + couponId, normalCoupon.getQuantity().longValue());
+        couponId = couponRepository.create(rateCoupon).getId();
+        redisTemplate.opsForValue().set(redisKey + couponId, rateCoupon.getQuantity().longValue());
 
         // 사용자1에게 쿠폰 미리 발급
         userCouponRepository.create(new CreateUserCoupon(1L, 2L));
@@ -143,7 +153,7 @@ class CouponFacadeIntegrationTest extends IntegrationTest {
 
         // 발급 전 쿠폰 수량 확인
         DomainCoupon beforeCoupon = couponRepository.findById(2L).orElseThrow();
-        int beforeQuantity = beforeCoupon.getQuantity();
+        long beforeQuantity = redisTemplate.opsForValue().get(redisKey + beforeCoupon.getId());
 
         // when
         facade.issue(command);
@@ -155,8 +165,11 @@ class CouponFacadeIntegrationTest extends IntegrationTest {
         assertThat(userCoupons.stream().anyMatch(uc -> uc.getCouponId().equals(2L))).isTrue();
 
         // 2. 쿠폰 수량이 감소했는지 확인
-        DomainCoupon afterCoupon = couponRepository.findById(2L).orElseThrow();
-        assertThat(afterCoupon.getQuantity()).isEqualTo(beforeQuantity - 1);
+        //DomainCoupon afterCoupon = couponRepository.findById(2L).orElseThrow();
+        long afterQuantity = redisTemplate.opsForValue().get(redisKey + beforeCoupon.getId());
+        assertThat(afterQuantity).isEqualTo(beforeQuantity - 1);
+
+
     }
 
     @Test
@@ -218,7 +231,7 @@ class CouponFacadeIntegrationTest extends IntegrationTest {
     void 중복_쿠폰_발급_테스트() {
         // given
         CouponIssueCommand command = CouponIssueCommand.builder()
-                .userId(1L)
+                .userId(2L)
                 .couponId(2L) // 이미 발급된 쿠폰
                 .build();
 
@@ -232,12 +245,12 @@ class CouponFacadeIntegrationTest extends IntegrationTest {
         facade.issue(command);
 
         // 중복 발급 후 사용자 쿠폰 확인
-        List<CouponMeCommand> userCoupons = facade.getMeCoupons(1L);
-        long count = userCoupons.stream()
-                .filter(c -> c.getCouponId().equals(2L))
-                .count();
+        List<CouponMeCommand> userCoupons = facade.getMeCoupons(2L);
+        long count = redisTemplate.opsForValue().get(redisKey + command.getCouponId());
 
-        assertThat(count).isEqualTo(2); // 같은 쿠폰이 2개 있어야 함
+        assertThat(count).isEqualTo(98L);
+        assertThat(userCoupons).hasSize(2); // 같은 쿠폰이 2개 있어야 함
+
     }
 
     @Test
