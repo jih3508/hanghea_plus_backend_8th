@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.support;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +14,7 @@ public abstract class IntegrationTest {
     @Autowired
     DatabaseCleanup databaseCleanup;
 
-    @BeforeEach
+    @AfterEach
     void setUp() {
         databaseCleanup.execute();
     }

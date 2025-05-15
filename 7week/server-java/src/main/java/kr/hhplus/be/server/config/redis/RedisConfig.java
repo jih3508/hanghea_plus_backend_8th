@@ -10,6 +10,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -51,6 +52,27 @@ public class RedisConfig {
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(serializer);
 
+        return template;
+    }
+
+    // String, Long 타입을 위한 RedisTemplate 설정
+    @Bean
+    public RedisTemplate<String, Long> redisLongTemplate() {
+        RedisTemplate<String, Long> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory());
+
+        // 키에는 StringRedisSerializer 사용
+        template.setKeySerializer(new StringRedisSerializer());
+
+        // Long 값을 위한 직렬화 설정
+        // GenericToStringSerializer를 사용하면 Long 값을 문자열로 변환하여 저장
+        template.setValueSerializer(new GenericToStringSerializer<>(Long.class));
+
+        // Hash 작업을 위한 직렬화 설정
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new GenericToStringSerializer<>(Long.class));
+
+        template.afterPropertiesSet();
         return template;
     }
 

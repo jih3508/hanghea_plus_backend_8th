@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.order;
 
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.common.util.RedisKeysPrefix;
 import kr.hhplus.be.server.domain.coupon.model.CreateCoupon;
 import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
@@ -29,15 +30,19 @@ import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
 import kr.hhplus.be.server.support.DatabaseCleanup;
 import kr.hhplus.be.server.support.IntegrationTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -87,6 +92,14 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
 
     @Autowired
     private ProductRankRepository productRankRepository;
+
+    @Autowired
+    private RedisTemplate<String, Long> redisTemplate;
+
+    private String redisKey = RedisKeysPrefix.PRODUCT_RANK_KEY_PREFIX;
+
+    private DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+
 
     @BeforeEach
     void setUp() {
@@ -175,6 +188,8 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
                 historyRepository.create(history);
             }
         }
+
+        redisTemplate.delete(redisKey);
     }
 
     @Test
@@ -230,6 +245,25 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         int afterStock2 = productStockRepository.findByProductId(2L).get().getQuantity();
         assertThat(beforeStock1 - 2).isEqualTo(afterStock1);  // 2개 주문했으므로 2개 감소
         assertThat(beforeStock2 - 1).isEqualTo(afterStock2);  // 1개 주문했으므로 1개 감소
+
+
+        //6. 레디스 저장 된것 확인 하기
+        LocalDate today = LocalDate.now();
+        String todayStr = today.format(DATE_FORMATTER);
+        String key = redisKey + todayStr;
+        Long score1 = redisTemplate.opsForZSet().score(key, 1L).longValue();
+        String tomorrowStr = today.plusDays(1L).format(DATE_FORMATTER);
+        key = redisKey + tomorrowStr;
+        Double score2 = redisTemplate.opsForZSet().score(key, 1L);
+        String dayAfterTomorrowStr = today.plusDays(2).format(DATE_FORMATTER);
+        key = redisKey + dayAfterTomorrowStr;
+        Double score3 = redisTemplate.opsForZSet().score(key, 1L);
+
+        assertThat(score1).isNotNull();
+        assertThat(score2).isNotNull();
+        assertThat(score3).isNotNull();
+        assertThat(score1).isEqualTo(item1.getQuantity());
+
     }
 
     @Test
@@ -271,6 +305,17 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         int afterStock3 = productStockRepository.findByProductId(3L).get().getQuantity();
         assertThat(beforeStock2).isEqualTo(afterStock2);
         assertThat(beforeStock3).isEqualTo(afterStock3);
+
+        // 레디스 저장 된것 확인
+        LocalDate today = LocalDate.now();
+        String todayStr = today.format(DATE_FORMATTER);
+        String key = redisKey + todayStr;
+        Long score1 = redisTemplate.opsForZSet().score(key, 2L).longValue();
+        Long score2 = redisTemplate.opsForZSet().score(key, 3L).longValue();
+
+        assertThat(score1).isNull();
+        assertThat(score2).isNull();
+
     }
 
     @Test
@@ -418,6 +463,22 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         // 포인트가 정확히 차감되었는지 확인
         BigDecimal afterPoint = pointRepository.findByUserId(userId).get().getPoint();
         assertThat(beforePoint.subtract(expectedTotalPrice)).isEqualTo(afterPoint);
+
+        // 레디스 저장 된것 확인
+        LocalDate today = LocalDate.now();
+        String todayStr = today.format(DATE_FORMATTER);
+        String key = redisKey + todayStr;
+
+        Long score1 = redisTemplate.opsForZSet().score(key, 1L).longValue();
+        Long score2 = redisTemplate.opsForZSet().score(key, 2L).longValue();
+        Long score3 = redisTemplate.opsForZSet().score(key, 3L).longValue();
+
+        assertThat(score1).isNotNull();
+        assertThat(score2).isNotNull();
+        assertThat(score3).isNotNull();
+        assertThat(score1).isEqualTo(item1.getQuantity());
+        assertThat(score2).isEqualTo(item2.getQuantity());
+        assertThat(score3).isEqualTo(item3.getQuantity());
     }
 
     @Test

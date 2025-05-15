@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.order.model.DomainOrderProductHistory;
 import kr.hhplus.be.server.domain.order.repository.OrderProductHistoryRepository;
 import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.infrastructure.order.entity.OrderProductHistory;
+import kr.hhplus.be.server.infrastructure.product.ProductRankRedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,8 +18,11 @@ public class OrderHistoryRepositoryImpl implements OrderProductHistoryRepository
 
     private final OrderProductHistoryJpaRepository repository;
 
+    private final ProductRankRedisRepository redisRepository;
+
     @Override
     public DomainOrderProductHistory create(CreateOrderProductHistory create) {
+        redisRepository.save(create);
         return repository.save(OrderProductHistory.create(create)).toDomain();
     }
 

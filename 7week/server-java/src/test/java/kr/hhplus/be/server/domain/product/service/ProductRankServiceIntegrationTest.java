@@ -1,13 +1,20 @@
 package kr.hhplus.be.server.domain.product.service;
 
+import kr.hhplus.be.server.common.util.RedisKeysPrefix;
 import kr.hhplus.be.server.domain.product.model.CreateProductRank;
 import kr.hhplus.be.server.domain.product.model.DomainProductRank;
 import kr.hhplus.be.server.domain.product.repository.ProductRankRepository;
 import kr.hhplus.be.server.support.IntegrationTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,11 +22,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("상품 랭킹 통합 테스트")
 class ProductRankServiceIntegrationTest extends IntegrationTest {
 
+    private static final Logger log = LoggerFactory.getLogger(ProductRankServiceIntegrationTest.class);
+
     @Autowired
     private ProductRankService service;
 
     @Autowired
     private ProductRankRepository repository;
+
+    @Autowired
+    private RedisTemplate<String, Long> redisTemplate;
+
+    private String redisKey = RedisKeysPrefix.PRODUCT_RANK_KEY_PREFIX;
+
+    private DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+
+    @AfterEach
+    void setUp(){
+        redisTemplate.delete(redisKey);
+    }
 
 
     @Test
@@ -57,5 +79,26 @@ class ProductRankServiceIntegrationTest extends IntegrationTest {
         List<DomainProductRank> result = service.todayProductRank();
 
         assertThat(result).hasSize(4);
+    }
+
+    @Test
+    @DisplayName("최근 3일 주문 데이터 가져오기 테스트")
+    void 레디스_최근_3일(){
+        //given
+        LocalDate today = LocalDate.now();
+        String yesterday = today.minusDays(1).format(DATE_FORMATTER);
+
+        for (long i = 1; i < 10; i++) {
+            long score = (long) Math.random() * 10000 + 10L;
+            redisTemplate.opsForZSet().add(redisKey + yesterday, i, score);
+        }
+
+
+        // when
+        List<DomainProductRank> result = service.todayProductRank();
+
+        // then
+        assertThat(result).hasSize(5);
+
     }
 }

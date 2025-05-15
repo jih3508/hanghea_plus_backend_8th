@@ -28,8 +28,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -56,41 +58,48 @@ public class OrderFacade {
 
     @DistributedLock(key = "#command.getProductIdsAsString()", type = LockType.STOCK, strategy = LockStrategy.PUB_SUB_LOCK)
     @Transactional
-    public void order(OrderCommand command){
+    public void order(OrderCommand command) {
 
-        DomainUser user = userService.findById(command.getUserId());
+        // 회원 존재하는지 여부 확인
+        userService.findById(command.getUserId());
 
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         CreateOrder createOrder = new CreateOrder(command.getUserId(), createOrderNumber());
 
+        Map<Long, Integer> beforeProduct = null;
+        beforeProduct = new HashMap<>();
 
-        for(OrderCommand.OrderItem item : command.getItems()){
+        for (OrderCommand.OrderItem item : command.getItems()) {
 
             DomainProduct product = productService.getProduct(item.getProductId());
             productStockService.delivering(product.getId(), item.getQuantity());
 
 
             DomainUserCoupon userCoupon = null;
-            if(item.getCouponId() != null){
+            if (item.getCouponId() != null) {
                 userCoupon = userCouponService.getUseCoupon(command.getUserId(), item.getProductId());
             }
             createOrder.addOrderItem(product, userCoupon, item.getQuantity());
-
+            beforeProduct.put(product.getId(), beforeProduct.getOrDefault(product.getId(), 0) + item.getQuantity());
         }
-
         DomainOrder order = service.create(createOrder);
+        try{
 
+            // 결제 처리
+            if (order.getTotalPrice().compareTo(totalPrice) > 0) {
+                pointService.use(command.getUserId(), totalPrice);
+                pointHistoryService.useHistory(command.getUserId(), totalPrice);
+            }
 
-
-        // 결제 처리
-        if(order.getTotalPrice().compareTo(totalPrice) > 0){
-            pointService.use(command.getUserId(), totalPrice);
-            pointHistoryService.useHistory(command.getUserId(), totalPrice);
+            // 외부 데이터 전송
+            externalTransmissionService.sendOrderData();
+        }catch (Exception e) {
+            log.error(e.getMessage(), e);
+            // 레디스 랭킹 롤백
+            beforeProduct.forEach((id, quantity) -> productStockService.delivering(id, quantity));
         }
 
-        // 외부 데이터 전송
-        externalTransmissionService.sendOrderData();
     }
 
 
