@@ -3,7 +3,6 @@ package kr.hhplus.be.server.infrastructure.order.entity;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
-import kr.hhplus.be.server.infrastructure.user.entity.User;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "order")
+@Table(name = "`order`")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -25,7 +24,7 @@ public class Order {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "order_numbe")
+    @Column(name = "order_number")
     private String orderNumber;
 
     @Column(name = "total_price")
@@ -35,12 +34,12 @@ public class Order {
     private BigDecimal discountPrice;
 
     @CreatedDate
-    @Column(name = "create_date_time", updatable = false)
-    private LocalDateTime createDateTime; // 생성 일시
+    @Column(name = "created_date_time", updatable = false)
+    private LocalDateTime createdDateTime; // 생성 일시
 
     @LastModifiedDate
-    @Column(name = "update_date_time")
-    private LocalDateTime updateDateTime; // 수정 일시
+    @Column(name = "updated_date_time")
+    private LocalDateTime updatedDateTime; // 수정 일시
 
     @Builder
     public Order(Long id, Long userId, String orderNumber, BigDecimal totalPrice, BigDecimal discountPrice) {
@@ -49,6 +48,7 @@ public class Order {
         this.orderNumber = orderNumber;
         this.totalPrice = totalPrice;
         this.discountPrice = discountPrice;
+        this.createdDateTime = LocalDateTime.now();
     }
 
     public static Order create(CreateOrder createOrder) {

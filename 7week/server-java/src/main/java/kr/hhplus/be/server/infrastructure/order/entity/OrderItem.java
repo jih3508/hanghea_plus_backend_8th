@@ -24,10 +24,10 @@ public class OrderItem {
     @Column(name = "order_id", nullable = false)
     private Long orderId;
 
-    @JoinColumn(name = "product_id", nullable = false)
+    @Column(name = "product_id", nullable = false)
     private Long productId;
 
-    @JoinColumn(name = "product_id", nullable = false)
+    @Column(name = "coupon_id")
     private Long couponId;
 
     @Column(name = "total_price")

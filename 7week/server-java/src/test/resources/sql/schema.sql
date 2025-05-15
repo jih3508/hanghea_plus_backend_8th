@@ -131,20 +131,26 @@ create table order_item
         primary key,
     order_id    bigint  not null comment '주문 FK',
     product_id  bigint  not null comment '상품 fk',
-    total_price decimal not null comment '상품 총 가격'
+    total_price decimal not null comment '상품 총 가격',
+    coupon_id   bigint  null comment '쿠폰 PK',
+    quantity    int     not null
 )
     comment '주문 상품';
 
+
+
 create table order_product_history
 (
-    id         bigint auto_increment comment 'PK'
+    id                bigint auto_increment comment 'PK'
         primary key,
-    order_id   bigint null comment '주문 FK',
-    product_id bigint not null comment '상품 fk',
-    quantity   int    not null comment '수량',
-    create_date_time datetime default CURRENT_TIMESTAMP not null
+    order_id          bigint                             null comment '주문 FK',
+    product_id        bigint                             not null comment '상품 fk',
+    quantity          int                                not null comment '수량',
+    created_date_time datetime default CURRENT_TIMESTAMP not null
 )
     comment '주문 상품 이력';
+
+
 
 create table product_rank
 (
