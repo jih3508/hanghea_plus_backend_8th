@@ -4,5 +4,5 @@ public class RedisKeysPrefix {
 
     public static final String PRODUCT_RANK_KEY_PREFIX = "product:rank:";
 
-    public static final String COUPON_KEY_PREFIX = "coupon:count:";
+    public static final String COUPON_KEY_PREFIX = "coupon:quantity:";
 }
