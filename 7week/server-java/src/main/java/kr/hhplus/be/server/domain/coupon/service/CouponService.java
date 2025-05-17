@@ -1,0 +1,41 @@
+package kr.hhplus.be.server.domain.coupon.service;
+
+import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
+import kr.hhplus.be.server.domain.coupon.model.UpdateCoupon;
+import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
+import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class CouponService {
+
+    private final CouponRepository repository;
+
+
+    public DomainCoupon getCoupon(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "쿠폰이 없습니다."));
+    }
+
+
+    public void checkCouponCounter(Long couponId) {
+        // 먼저 쿠폰 개수를 차감하고 개수가 부족하면 오류 보낸다.
+        if(!repository.decreaseCoupon(couponId)) {
+            throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "쿠폰 개수가 부족합니다.");
+        }
+    }
+
+    public DomainCoupon issueCoupon(Long couponId) {
+        DomainCoupon coupon = this.getCoupon(couponId);
+        coupon.issueCoupon();
+        return repository.update(new UpdateCoupon(coupon.getId(), coupon.getQuantity()));
+    }
+
+    public void resetCouponCounter(Long couponId) {
+        repository.increaseCoupon(couponId);
+    }
+
+}
