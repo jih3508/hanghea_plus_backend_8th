@@ -1,0 +1,62 @@
+package kr.hhplus.be.server.application.order;
+
+import kr.hhplus.be.server.interfaces.api.order.request.OrderRequest;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@Builder
+public class OrderCommand {
+
+    private Long userId;
+
+    private List<OrderItem> items;
+
+    @Builder
+    @Getter
+    public static class OrderItem{
+
+        private Long productId;
+
+        private Long couponId;
+
+        private Integer quantity;
+    }
+
+    public static OrderCommand toCommand(Long userId, OrderRequest request){
+        List<OrderCommand.OrderItem> list = new LinkedList<>();
+        request.getItems().forEach(item->{
+            OrderItem orderItem = OrderCommand.OrderItem.builder()
+                    .productId(item.getProductId())
+                    .quantity(item.getQuantity())
+                    .build();
+            list.add(orderItem);
+        });
+
+       return OrderCommand.builder()
+               .userId(userId)
+               .items(list)
+               .build();
+    }
+
+    public String[] getProductIds(){
+        return items.stream()
+                .map(item -> String.valueOf(item.getProductId()))
+                .toArray(String[]::new);
+    }
+
+    public String getProductIdsAsString() {
+        return items.stream()
+                .map(item -> String.valueOf(item.getProductId()))
+                .collect(Collectors.joining(","));
+    }
+
+}
