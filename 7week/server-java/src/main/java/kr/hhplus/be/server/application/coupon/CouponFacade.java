@@ -31,15 +31,23 @@ public class CouponFacade {
      * method: issue
      * description: 쿠폰발급
      */
-    @DistributedLock(key = "#command.getCouponId()", type = LockType.COUPON , strategy = LockStrategy.PUB_SUB_LOCK)
+    //@DistributedLock(key = "#command.getCouponId()", type = LockType.COUPON , strategy = LockStrategy.PUB_SUB_LOCK)
     @Transactional
     public void issue(CouponIssueCommand command) {
 
-        DomainUser user = userService.findById(command.getUserId());
+        // 쿠폰 개수 있지는지 먼저 조회
+        service.checkCouponCounter(command.getCouponId());
 
-        DomainCoupon coupon = service.issueCoupon(command.getCouponId());
+        try {
 
-        userCouponService.issue(user.getId(), coupon.getId());
+            DomainUser user = userService.findById(command.getUserId());
+            userCouponService.issue(user.getId(), command.getCouponId());
+
+        }catch (RuntimeException e) {
+
+            // 중간에 실패 하면 다시 원복 시킴
+            service.resetCouponCounter(command.getCouponId());
+        }
 
     }
 

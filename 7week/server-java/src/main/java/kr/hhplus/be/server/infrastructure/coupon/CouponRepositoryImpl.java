@@ -17,6 +17,8 @@ public class CouponRepositoryImpl implements CouponRepository {
 
     private final CouponJpaRepository jpaRepository;
 
+    private final CouponRedisRepository redisRepository;
+
     @Override
     public Optional<DomainCoupon> findById(long id) {
         return jpaRepository.findById(id).map(Coupon::toDomain);
@@ -32,5 +34,15 @@ public class CouponRepositoryImpl implements CouponRepository {
         Coupon coupon = jpaRepository.findById(updateCoupon.getCouponId()).get();
         coupon.setQuantity(updateCoupon.getQuantity());
         return jpaRepository.save(coupon).toDomain();
+    }
+
+    @Override
+    public Boolean decreaseCoupon(long couponId) {
+        return redisRepository.decreaseCoupon(couponId);
+    }
+
+    @Override
+    public void increaseCoupon(long couponId) {
+        redisRepository.increaseCoupon(couponId);
     }
 }

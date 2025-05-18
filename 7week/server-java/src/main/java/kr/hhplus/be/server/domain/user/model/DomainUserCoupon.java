@@ -65,6 +65,8 @@ public class DomainUserCoupon {
     public static DomainUserCoupon of(UserCoupon userCoupon, Coupon coupon) {
         return DomainUserCoupon.builder()
                 .id(userCoupon.getId())
+                .userId(userCoupon.getUserId())
+                .couponId(coupon.getId())
                 .couponNumber(coupon.getCouponNumber())
                 .type(coupon.getType())
                 .discountPrice(coupon.getDiscountPrice())

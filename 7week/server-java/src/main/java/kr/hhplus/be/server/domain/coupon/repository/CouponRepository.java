@@ -14,4 +14,8 @@ public interface CouponRepository {
 
     DomainCoupon update(UpdateCoupon coupon);
 
+    Boolean decreaseCoupon(long couponId);
+
+    void increaseCoupon(long couponId);
+
 }
