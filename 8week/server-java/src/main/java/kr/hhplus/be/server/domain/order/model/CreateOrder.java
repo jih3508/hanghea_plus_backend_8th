@@ -50,7 +50,7 @@ public class CreateOrder {
         this.orderItems.add(
                 OrderItem.builder()
                         .productId(product.getId())
-                        .couponId(userCoupon.getCouponId())
+                        .couponId(userCoupon != null? userCoupon.getCouponId() : null)
                         .quantity(quantity)
                         .totalPrice(totalPrice)
                         .build()

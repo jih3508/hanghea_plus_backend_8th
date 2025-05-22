@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.order;
 
 import jakarta.transaction.Transactional;
+import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.common.lock.DistributedLock;
 import kr.hhplus.be.server.common.lock.LockStrategy;
 import kr.hhplus.be.server.common.lock.LockType;
@@ -65,8 +66,6 @@ public class OrderFacade {
         // 회원 존재하는지 여부 확인
         userService.findById(command.getUserId());
 
-
-        BigDecimal totalPrice = BigDecimal.ZERO;
         CreateOrder createOrder = new CreateOrder(command.getUserId(), createOrderNumber());
 
         Map<Long, Integer> beforeProduct = null;
@@ -89,18 +88,19 @@ public class OrderFacade {
         try{
 
             // 결제 처리
-            if (order.getTotalPrice().compareTo(totalPrice) > 0) {
-                pointService.use(command.getUserId(), totalPrice);
-                pointHistoryService.useHistory(command.getUserId(), totalPrice);
+            if (order.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
+                pointService.use(command.getUserId(), order.getTotalPrice());
+                pointHistoryService.useHistory(command.getUserId(), order.getTotalPrice());
             }
 
             // 외부 데이터 전송
             eventPublisher.publishEvent(OrderEvent.created(order));
 
-        }catch (Exception e) {
+        }catch (ApiExceptionResponse e) {
             log.error(e.getMessage(), e);
             // 레디스 랭킹 롤백
             beforeProduct.forEach((id, quantity) -> productStockService.delivering(id, quantity));
+            throw e;
         }
 
     }
