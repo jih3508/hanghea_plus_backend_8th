@@ -5,7 +5,6 @@ import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
 import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
 import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
-import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
 import kr.hhplus.be.server.domain.user.repository.UserCouponRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,7 @@ class UserCouponServiceTest {
     void 사용X_쿠폰(){
 
         //given, when
-        when(repository.findByUserIdAndCouponId(anyLong(), anyLong())).thenThrow(new ApiExceptionResponse(HttpStatus.NOT_FOUND, "사용가능 한 쿠폰 없습니다."));
+        when(repository.findByUserIdAndCouponIdLock(anyLong(), anyLong())).thenThrow(new ApiExceptionResponse(HttpStatus.NOT_FOUND, "사용가능 한 쿠폰 없습니다."));
 
         // then
         assertThatThrownBy(() -> service.getUseCoupon(anyLong(), anyLong()))
@@ -86,7 +85,7 @@ class UserCouponServiceTest {
                 .isUsed(true)
                 .build();
 
-        when(repository.findByUserIdAndCouponId(1L, 1L)).thenReturn(Optional.of(expected));
+        when(repository.findByUserIdAndCouponIdLock(1L, 1L)).thenReturn(Optional.of(expected));
 
         DomainUserCoupon result = service.getUseCoupon(1L, 1L);
 
