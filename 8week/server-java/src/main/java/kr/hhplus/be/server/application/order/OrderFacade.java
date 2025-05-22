@@ -7,6 +7,7 @@ import kr.hhplus.be.server.common.lock.LockType;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
+import kr.hhplus.be.server.domain.order.model.OrderEvent;
 import kr.hhplus.be.server.domain.order.service.OrderService;
 import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
@@ -24,6 +25,7 @@ import kr.hhplus.be.server.infrastructure.order.entity.OrderItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -52,7 +54,7 @@ public class OrderFacade {
 
     private final UserCouponService userCouponService;
 
-    private final ExternalTransmissionService  externalTransmissionService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final ProductRankService productRankService;
 
@@ -93,7 +95,8 @@ public class OrderFacade {
             }
 
             // 외부 데이터 전송
-            externalTransmissionService.sendOrderData();
+            eventPublisher.publishEvent(OrderEvent.created(order));
+
         }catch (Exception e) {
             log.error(e.getMessage(), e);
             // 레디스 랭킹 롤백
