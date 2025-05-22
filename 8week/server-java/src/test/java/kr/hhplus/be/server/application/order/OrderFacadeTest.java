@@ -4,6 +4,7 @@ import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
+import kr.hhplus.be.server.domain.order.model.OrderEvent;
 import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.domain.product.model.DomainProduct;
 import kr.hhplus.be.server.domain.product.service.ProductRankService;
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
@@ -68,6 +70,9 @@ class OrderFacadeTest {
     @Mock
     private ExternalTransmissionService externalTransmissionService;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @Test
     @DisplayName("잔액이 부족할 경우 부족 테스트")
     void 주문_결제_잔액_부족(){
@@ -86,19 +91,19 @@ class OrderFacadeTest {
                 .build();
 
         //when
-        when(userService.findById(any())).thenReturn(user);
+        when(userService.findById(order.getId())).thenReturn(user);
         when(orderService.create(any(CreateOrder.class))).thenReturn(order);
-        when(pointService.use(anyLong(), any())).thenThrow(new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "잔액 부족!!!!"));
+        when(pointService.use(any(), any())).thenThrow(new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "잔액 부족!!!!"));
 
 
         // then
+
         assertThatThrownBy(() -> facade.order(command))
                 .isInstanceOf(ApiExceptionResponse.class)
                 .hasMessage("잔액 부족!!!!");
-        verify(facade, times(1)).createOrderNumber();
         verify(orderService, times(1)).create(any(CreateOrder.class));
         verify(pointService, times(1)).use(any(), any());
-        verify(externalTransmissionService, never()).sendOrderData();
+        verify(eventPublisher, never()).publishEvent(any(OrderEvent.class));
 
 
 
@@ -121,16 +126,15 @@ class OrderFacadeTest {
                 .build();
 
         //when
-        when(userService.findById(any())).thenReturn(user);
+        when(userService.findById(order.getUserId())).thenReturn(user);
         when(orderService.create(any(CreateOrder.class))).thenReturn(order);
         facade.order(command);
 
         // then
-        verify(facade, times(1)).createOrderNumber();
         verify(orderService, times(1)).create(any(CreateOrder.class));
         verify(pointService, times(1)).use(any(), any());
         verify(pointHistoryService, times(1)).useHistory(any(), any());
-        verify(externalTransmissionService, times(1)).sendOrderData();
+        verify(eventPublisher, times(1)).publishEvent(any(OrderEvent.class));
 
     }
 
@@ -151,16 +155,15 @@ class OrderFacadeTest {
                 .build();
 
         //when
-        when(userService.findById(any())).thenReturn(user);
+        when(userService.findById(order.getUserId())).thenReturn(user);
         when(orderService.create(any(CreateOrder.class))).thenReturn(order);
         facade.order(command);
 
         // then
-        verify(facade, times(1)).createOrderNumber();
         verify(orderService, times(1)).create(any(CreateOrder.class));
         verify(pointService, never()).use(any(), any());
         verify(pointHistoryService, never()).useHistory(any(), any());
-        verify(externalTransmissionService, times(1)).sendOrderData();
+        verify(eventPublisher, times(1)).publishEvent(any(OrderEvent.class));
 
     }
 
