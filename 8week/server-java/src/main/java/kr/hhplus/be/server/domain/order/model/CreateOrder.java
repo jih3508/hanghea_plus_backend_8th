@@ -44,7 +44,7 @@ public class CreateOrder {
             totalPrice = discount;
 
         }else{
-            this.totalPrice = totalPrice.add(totalPrice);
+            this.totalPrice = this.totalPrice.add(totalPrice);
         }
 
         this.orderItems.add(
