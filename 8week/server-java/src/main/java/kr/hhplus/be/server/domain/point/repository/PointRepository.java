@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface PointRepository {
 
-    Optional<DomainPoint>  findByUserId(Long userId);
+    Optional<DomainPoint> findByUserIdLock(Long userId);
 
     DomainPoint create(Long userId);
 
@@ -20,6 +20,6 @@ public interface PointRepository {
 
     void delete(Long userId);
 
-
+    Optional<DomainPoint> findByUserId(Long userId);
 
 }

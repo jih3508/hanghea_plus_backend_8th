@@ -5,7 +5,6 @@ import kr.hhplus.be.server.domain.point.model.DomainPoint;
 import kr.hhplus.be.server.domain.point.model.UpdatePoint;
 import kr.hhplus.be.server.domain.point.service.PointService;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
-import kr.hhplus.be.server.infrastructure.point.entity.Point;
 import kr.hhplus.be.server.domain.point.repository.PointRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +40,7 @@ class PointServiceTest {
     @DisplayName("포인트 정보가 없은 경우 포인트 조회 살패 한다.")
     void 없는_포인트_조회(){
         // given, when
-        when(repository.findByUserId(anyLong())).thenThrow(new ApiExceptionResponse(HttpStatus.NOT_FOUND, "포인트를 찾을 수 없습니다."));
+        when(repository.findByUserIdLock(anyLong())).thenThrow(new ApiExceptionResponse(HttpStatus.NOT_FOUND, "포인트를 찾을 수 없습니다."));
 
         // then
         assertThatThrownBy(() -> service.getPoint(10L))
@@ -67,7 +66,7 @@ class PointServiceTest {
                 .build();
 
         // given, when
-        when(repository.findByUserId(1L)).thenReturn(Optional.of(expected));
+        when(repository.findByUserIdLock(1L)).thenReturn(Optional.of(expected));
 
         DomainPoint point = service.getPoint(1L);
 
@@ -79,7 +78,7 @@ class PointServiceTest {
     @DisplayName("충전시 포인트 조회시 없으면 실패한다.")
     void 충전_포인트_조회_실패(){
         // given, when
-        when(repository.findByUserId(anyLong())).thenThrow(new ApiExceptionResponse(HttpStatus.NOT_FOUND, "포인트를 찾을 수 없습니다."));
+        when(repository.findByUserIdLock(anyLong())).thenThrow(new ApiExceptionResponse(HttpStatus.NOT_FOUND, "포인트를 찾을 수 없습니다."));
 
         // then
         assertThatThrownBy(() -> service.charge(10L, any()))
@@ -108,7 +107,7 @@ class PointServiceTest {
         BigDecimal amount = new BigDecimal(100_000L);
 
         // when
-        when(repository.findByUserId(1l)).thenReturn(Optional.of(point));
+        when(repository.findByUserIdLock(1l)).thenReturn(Optional.of(point));
 
         // then
         assertThatThrownBy(() -> service.charge(1l, amount))
@@ -145,7 +144,7 @@ class PointServiceTest {
                 .build();
 
         // when
-        when(repository.findByUserId(1l)).thenReturn(Optional.of(point));
+        when(repository.findByUserIdLock(1l)).thenReturn(Optional.of(point));
         when(repository.update(any(UpdatePoint.class))).thenReturn(expected);
 
         DomainPoint result = service.charge(1l, amount);
@@ -154,7 +153,7 @@ class PointServiceTest {
 
         //then
         assertThat(result.getPoint()).isEqualTo(new BigDecimal(100_000).add(amount));
-        verify(repository, times(1)).findByUserId(1L);
+        verify(repository, times(1)).findByUserIdLock(1L);
         //verify(repository, times(1)).save(any(Point.class));
 
     }
@@ -178,7 +177,7 @@ class PointServiceTest {
         BigDecimal amount = new BigDecimal(500_000L);
 
         // when
-        when(repository.findByUserId(1l)).thenReturn(Optional.of(point));
+        when(repository.findByUserIdLock(1l)).thenReturn(Optional.of(point));
 
         assertThatThrownBy(() -> service.use(1l, amount))
         .isInstanceOf(ApiExceptionResponse.class)
@@ -206,7 +205,7 @@ class PointServiceTest {
         BigDecimal amount = new BigDecimal(50_000L);
 
         // when
-        when(repository.findByUserId(1l)).thenReturn(Optional.of(point));
+        when(repository.findByUserIdLock(1l)).thenReturn(Optional.of(point));
         when(repository.update(any(UpdatePoint.class))).thenReturn(
                 DomainPoint.builder()
                         .id(1L)
