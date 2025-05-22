@@ -25,10 +25,10 @@ public class UserCouponRepositoryImpl implements UserCouponRepository {
 
 
     @Override
-    public Optional<DomainUserCoupon> findByUserIdAndCouponId(Long userId, Long couponId) {
+    public Optional<DomainUserCoupon> findByUserIdAndCouponIdLock(Long userId, Long couponId) {
 
 
-        return repository.findByUserIdAndCouponId(userId, couponId)
+        return repository.findByUserIdAndCouponIdLock(userId, couponId)
                 .map( userCoupon -> {
                     Coupon coupon = couponRepository.findById(couponId).get();
                     return DomainUserCoupon.of(userCoupon, coupon);
@@ -58,5 +58,14 @@ public class UserCouponRepositoryImpl implements UserCouponRepository {
                         Coupon coupon = couponRepository.findById(userCoupon.getCouponId()).get();
                         return DomainUserCoupon.of(userCoupon, coupon);
                     }).toList();
+    }
+
+    @Override
+    public Optional<DomainUserCoupon> findByUserIdAndCouponId(Long userId, Long couponId) {
+        return repository.findByUserIdAndCouponId(userId, couponId)
+                .map( userCoupon -> {
+                    Coupon coupon = couponRepository.findById(couponId).get();
+                    return DomainUserCoupon.of(userCoupon, coupon);
+                });
     }
 }

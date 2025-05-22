@@ -99,7 +99,7 @@ public class OrderFacade {
         }catch (ApiExceptionResponse e) {
             log.error(e.getMessage(), e);
             // 레디스 랭킹 롤백
-            beforeProduct.forEach((id, quantity) -> productStockService.delivering(id, quantity));
+            beforeProduct.forEach((id, quantity) -> productRankService.resetRank(id, quantity));
             throw e;
         }
 

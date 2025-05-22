@@ -74,6 +74,7 @@ public class DomainUserCoupon {
                 .endDateTime(coupon.getEndDateTime())
                 .userId(userCoupon.getUserId())
                 .issuedDateTime(userCoupon.getIssuedDateTime())
+                .isUsed(userCoupon.getIsUsed())
                 .build();
     }
 }

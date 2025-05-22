@@ -25,7 +25,7 @@ public class ProductRankRepositoryImpl implements ProductRankRepository {
     private final ProductJpaRepository productRepository;
 
     @Override
-    public void manySave(List<CreateProductRank> productRank) {
+    public void saveAll(List<CreateProductRank> productRank) {
         List<ProductRank> productRanks = productRank.stream()
                         .map(create -> {
                             Product product = productRepository.findById(create.getProductId()).get();

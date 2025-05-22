@@ -16,7 +16,7 @@ public class ProductRankService {
     private final ProductRankRepository repository;
 
     public void save(List<CreateProductRank> productRank){
-        repository.manySave(productRank);
+        repository.saveAll(productRank);
     }
 
     public List<DomainProductRank> todayProductRank(){
