@@ -4,7 +4,8 @@ import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.common.lock.DistributedLock;
 import kr.hhplus.be.server.common.lock.LockStrategy;
 import kr.hhplus.be.server.common.lock.LockType;
-import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
+import kr.hhplus.be.server.domain.event.EventPublisher;
+import kr.hhplus.be.server.domain.order.event.OrderEvent;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
 import kr.hhplus.be.server.domain.order.service.OrderService;
@@ -52,9 +53,11 @@ public class OrderFacade {
 
     private final UserCouponService userCouponService;
 
-    private final ExternalTransmissionService  externalTransmissionService;
-
     private final ProductRankService productRankService;
+    
+    private final EventPublisher eventPublisher;
+    
+    private final OrderEventHandler orderEventHandler;
 
     @DistributedLock(key = "#command.getProductIdsAsString()", type = LockType.STOCK, strategy = LockStrategy.PUB_SUB_LOCK)
     @Transactional
@@ -91,9 +94,10 @@ public class OrderFacade {
                 pointService.use(command.getUserId(), totalPrice);
                 pointHistoryService.useHistory(command.getUserId(), totalPrice);
             }
-
-            // 외부 데이터 전송
-            externalTransmissionService.sendOrderData();
+            
+            // 트랜잭션이 성공적으로 완료된 후 이벤트 발행
+            // 외부 데이터 전송 로직이 트랜잭션 성공과 분리되어 실행됨
+            orderEventHandler.publishOrderCreated(order);
         }catch (Exception e) {
             log.error(e.getMessage(), e);
             // 레디스 랭킹 롤백
