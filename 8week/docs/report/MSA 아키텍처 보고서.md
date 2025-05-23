@@ -154,11 +154,11 @@ graph TB
         PS[Product Service]
         OS[Order Service]
         PMS[Payment Service]
-        PRS[Promotion Service]
+        PRS[Coupon Service]
     end
     
     subgraph "Infrastructure"
-        MQ[Message Queue<br/>Kafka/RabbitMQ]
+        MQ[Message Queue<br/>Kafka]
         SC[Service Registry<br/>Eureka]
         CF[Config Server]
     end
@@ -168,7 +168,7 @@ graph TB
         PDB[(Product DB)]
         ODB[(Order DB)]
         PMDB[(Payment DB)]
-        PRDB[(Promotion DB)]
+        PRDB[(Coupon DB)]
         RD[(Redis)]
     end
     
@@ -215,7 +215,7 @@ sequenceDiagram
     participant Client
     participant Order Service
     participant Product Service
-    participant Payment Service
+    participant Point Service
     participant Coupon Service
     participant Message Queue
     
@@ -237,16 +237,16 @@ sequenceDiagram
     Coupon Service->>Coupon Service: 쿠폰 사용 처리
     Coupon Service->>Message Queue: CouponAppliedEvent
     
-    Message Queue->>Payment Service: CouponAppliedEvent
-    Payment Service->>Payment Service: 포인트 차감
+    Message Queue->>Point Service: CouponAppliedEvent
+    Point Service->>Point Service: 포인트 차감
     alt 포인트 부족
-        Payment Service->>Message Queue: PaymentFailedEvent
+        Point Service->>Message Queue: PaymentFailedEvent
         Message Queue->>Product Service: 재고 복원
         Message Queue->>Coupon Service: 쿠폰 복원
         Message Queue->>Order Service: 주문 취소
         Order Service->>Client: 주문 실패
     else 결제 성공
-        Payment Service->>Message Queue: PaymentCompletedEvent
+        Point Service->>Message Queue: PaymentCompletedEvent
         Message Queue->>Order Service: PaymentCompletedEvent
         Order Service->>Order Service: 주문 확정 (COMPLETED)
         Order Service->>Client: 주문 성공
