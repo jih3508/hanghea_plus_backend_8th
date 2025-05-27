@@ -54,22 +54,6 @@ public class Point {
                 .build();
     }
 
-    public void charge(BigDecimal amount) {
-        this.point = this.point.add(amount);
-
-        if(point.compareTo(MAX_POINT) > 0) {
-            throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "충전후 포인트가 한도 초과 되었습니다.");
-        }
-    }
-
-
-    public void use(BigDecimal amount) {
-        if(point.compareTo(amount) < 0) {
-            throw new ApiExceptionResponse(HttpStatus.BAD_REQUEST, "잔액 부족!!!!");
-        }
-
-        this.point = this.point.subtract(amount);
-    }
 
     public DomainPoint toDomain(){
         return DomainPoint.builder()

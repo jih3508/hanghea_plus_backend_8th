@@ -4,9 +4,6 @@ import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.user.model.CreateUserCoupon;
 import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
 import kr.hhplus.be.server.domain.user.model.UpdateUserCoupon;
-import kr.hhplus.be.server.infrastructure.coupon.entity.Coupon;
-import kr.hhplus.be.server.infrastructure.user.entity.User;
-import kr.hhplus.be.server.infrastructure.user.entity.UserCoupon;
 import kr.hhplus.be.server.domain.user.repository.UserCouponRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,7 +24,7 @@ public class UserCouponService {
      */
     public DomainUserCoupon getUseCoupon(Long userId, Long couponId) {
 
-        return repository.findByUserIdAndCouponId(userId, couponId)
+        return repository.findByUserIdAndCouponIdLock(userId, couponId)
                 .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "사용가능 한 쿠폰 없습니다."));
     }
 

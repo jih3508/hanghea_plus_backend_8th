@@ -3,13 +3,10 @@ package kr.hhplus.be.server.infrastructure.point;
 import kr.hhplus.be.server.domain.point.model.DomainPoint;
 import kr.hhplus.be.server.domain.point.model.UpdatePoint;
 import kr.hhplus.be.server.infrastructure.point.entity.Point;
-import kr.hhplus.be.server.domain.point.model.CreatePoint;
 import kr.hhplus.be.server.domain.point.repository.PointRepository;
 import kr.hhplus.be.server.infrastructure.user.UserJpaRepository;
-import kr.hhplus.be.server.infrastructure.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -23,9 +20,9 @@ public class PointRepositoryImpl implements PointRepository {
     private final UserJpaRepository userJpaRepository;
 
     @Override
-    public Optional<DomainPoint> findByUserId(Long userId) {
+    public Optional<DomainPoint> findByUserIdLock(Long userId) {
 
-        return jpaRepository.findByUserId(userId)
+        return jpaRepository.findByUserIdLock(userId)
                 .map(Point::toDomain);
     }
 
@@ -64,6 +61,12 @@ public class PointRepositoryImpl implements PointRepository {
     @Override
     public void delete(Long userId) {
         jpaRepository.deleteById(userId);
+    }
+
+    @Override
+    public Optional<DomainPoint> findByUserId(Long userId) {
+        return jpaRepository.findByUserId(userId)
+                .map(Point::toDomain);
     }
 
 }

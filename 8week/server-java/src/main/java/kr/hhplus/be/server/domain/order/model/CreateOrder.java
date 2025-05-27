@@ -44,13 +44,13 @@ public class CreateOrder {
             totalPrice = discount;
 
         }else{
-            this.totalPrice = totalPrice.add(totalPrice);
+            this.totalPrice = this.totalPrice.add(totalPrice);
         }
 
         this.orderItems.add(
                 OrderItem.builder()
                         .productId(product.getId())
-                        .couponId(userCoupon.getCouponId())
+                        .couponId(userCoupon != null? userCoupon.getCouponId() : null)
                         .quantity(quantity)
                         .totalPrice(totalPrice)
                         .build()

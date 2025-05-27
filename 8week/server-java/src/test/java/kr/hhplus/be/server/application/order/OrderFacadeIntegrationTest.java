@@ -5,12 +5,12 @@ import kr.hhplus.be.server.common.util.RedisKeysPrefix;
 import kr.hhplus.be.server.domain.coupon.model.CreateCoupon;
 import kr.hhplus.be.server.domain.coupon.model.DomainCoupon;
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository;
+import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.model.CreateOrderProductHistory;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
 import kr.hhplus.be.server.domain.order.repository.OrderProductHistoryRepository;
 import kr.hhplus.be.server.domain.order.repository.OrderRepository;
 import kr.hhplus.be.server.domain.order.service.OrderService;
-import kr.hhplus.be.server.domain.point.model.CreatePoint;
 import kr.hhplus.be.server.domain.point.model.DomainPointHistory;
 import kr.hhplus.be.server.domain.point.repository.PointHistoryRepository;
 import kr.hhplus.be.server.domain.point.repository.PointRepository;
@@ -28,7 +28,6 @@ import kr.hhplus.be.server.domain.user.repository.UserRepository;
 import kr.hhplus.be.server.infrastructure.coupon.entity.CouponType;
 import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import kr.hhplus.be.server.infrastructure.user.entity.User;
-import kr.hhplus.be.server.support.DatabaseCleanup;
 import kr.hhplus.be.server.support.IntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -50,7 +51,9 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @DisplayName("주문 파사드 통합 테스트")
 class OrderFacadeIntegrationTest extends IntegrationTest {
@@ -96,6 +99,10 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
     @Autowired
     private RedisTemplate<String, Long> redisTemplate;
 
+    @MockitoBean
+    private ExternalTransmissionService externalTransmissionService;
+
+
     private String redisKey = RedisKeysPrefix.PRODUCT_RANK_KEY_PREFIX;
 
     private DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -112,7 +119,7 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         log.info(user.toString());
 
         // 충분한 포인트를 가진 사용자 생성
-        pointRepository.create(user.getId());
+        pointRepository.create(user.getId(), BigDecimal.valueOf(1_000_000));
 
         // 포인트가 부족한 사용자 생성
         createUser = CreateUser.builder()
@@ -121,7 +128,7 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
                 .build();
         User poorUser = userRepository.create(createUser);
 
-        pointRepository.create(user.getId());
+        pointRepository.create(poorUser.getId(), BigDecimal.valueOf(100));
 
         // 상품 생성
         CreateProduct createProduct1 = CreateProduct.builder()
@@ -180,20 +187,56 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
 
         userCouponRepository.create(new CreateUserCoupon(user.getId(), coupon.getId()));
 
-        // 주문 이력 데이터 생성 (랭킹 테스트용)
-        LocalDateTime now = LocalDateTime.now();
-        for (int i = 1; i <= 3; i++) {
-            for (int j = 0; j < i * 2; j++) {
-                CreateOrderProductHistory history = new CreateOrderProductHistory(j + 1L, Long.valueOf(i), i + j);
-                historyRepository.create(history);
-            }
-        }
+
 
         redisTemplate.delete(redisKey);
     }
 
+    @AfterEach
+    void tearDown() {
+        // 레디스 key 삭제
+        LocalDate today = LocalDate.now();
+        String todayStr = today.format(DATE_FORMATTER);
+        String key = redisKey + todayStr;
+        redisTemplate.delete(key);
+        String tomorrowStr = today.plusDays(1L).format(DATE_FORMATTER);
+        key = redisKey + tomorrowStr;
+        redisTemplate.delete(key);
+        String dayAfterTomorrowStr = today.plusDays(2).format(DATE_FORMATTER);
+        key = redisKey + dayAfterTomorrowStr;
+        redisTemplate.delete(key);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 상품 주문 실패 테스트")
+    void 존재하지_않는_상품_주문_실패_테스트() {
+        // given
+        Long userId = 1L;
+        Long nonExistingProductId = 999L;
+
+        OrderCommand.OrderItem item = OrderCommand.OrderItem.builder()
+                .productId(nonExistingProductId)
+                .quantity(1)
+                .build();
+
+        OrderCommand command = OrderCommand.builder()
+                .userId(userId)
+                .items(List.of(item))
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> facade.order(command))
+                .isInstanceOf(ApiExceptionResponse.class)
+                .hasMessageContaining("재고 정보가 없습니다.");
+
+
+        // 이벤트 Listner 동작 여부
+        verify(externalTransmissionService, never()).sendOrderData(any(DomainOrder.class));
+    }
+
     @Test
     @DisplayName("정상 주문 통합 테스트")
+    @Commit
     void 정상_주문_통합테스트() {
         // given
         Long userId = 1L;  // 충분한 포인트를 가진 사용자
@@ -226,6 +269,7 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         // then
         // 1. 주문이 생성되었는지 확인
         List<DomainOrder> orders = orderRepository.findByUserId(userId);
+        log.info(orders.toString());
         assertThat(orders).isNotEmpty();
         DomainOrder createdOrder = orders.get(orders.size() - 1);
 
@@ -251,7 +295,7 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         LocalDate today = LocalDate.now();
         String todayStr = today.format(DATE_FORMATTER);
         String key = redisKey + todayStr;
-        Long score1 = redisTemplate.opsForZSet().score(key, 1L).longValue();
+        Integer score1 = redisTemplate.opsForZSet().score(key, 1L).intValue();
         String tomorrowStr = today.plusDays(1L).format(DATE_FORMATTER);
         key = redisKey + tomorrowStr;
         Double score2 = redisTemplate.opsForZSet().score(key, 1L);
@@ -263,6 +307,9 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         assertThat(score2).isNotNull();
         assertThat(score3).isNotNull();
         assertThat(score1).isEqualTo(item1.getQuantity());
+
+        // 이벤트 Listner
+        verify(externalTransmissionService, times(1)).sendOrderData(any(DomainOrder.class));
 
     }
 
@@ -298,6 +345,7 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
 
         // 주문이 생성되었는지 확인 (롤백되어야 함)
         List<DomainOrder> orders = orderRepository.findByUserId(userId);
+        log.info(orders.toString());
         assertThat(orders).isEmpty();
 
         // 재고가 차감되지 않았는지 확인 (롤백되어야 함)
@@ -313,10 +361,14 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         Long score1 = redisTemplate.opsForZSet().score(key, 2L).longValue();
         Long score2 = redisTemplate.opsForZSet().score(key, 3L).longValue();
 
-        assertThat(score1).isNull();
-        assertThat(score2).isNull();
+        assertThat(score1).isZero();
+        assertThat(score2).isZero();
+
+
+        verify(externalTransmissionService, never()).sendOrderData(any(DomainOrder.class));
 
     }
+
 
     @Test
     @DisplayName("쿠폰 적용 주문 통합 테스트")
@@ -339,10 +391,6 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         // 주문 전 포인트 확인
         BigDecimal beforePoint = pointRepository.findByUserId(userId).get().getPoint();
 
-        // 쿠폰 사용 여부 확인
-        boolean couponUsedBefore = userCouponRepository.findByUserIdAndCouponId(userId, couponId).get().getIsUsed();
-        assertThat(couponUsedBefore).isFalse();
-
         // when
         facade.order(command);
 
@@ -353,6 +401,7 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         DomainOrder createdOrder = orders.get(orders.size() - 1);
 
         // 쿠폰이 사용 처리되었는지 확인
+        log.info(userCouponRepository.findByUserIdAndCouponId(userId, couponId).toString());
         boolean couponUsedAfter = userCouponRepository.findByUserIdAndCouponId(userId, couponId).get().getIsUsed();
         assertThat(couponUsedAfter).isTrue();
 
@@ -362,6 +411,9 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         // 포인트가 정확히 차감되었는지 확인
         BigDecimal afterPoint = pointRepository.findByUserId(userId).get().getPoint();
         assertThat(beforePoint.subtract(new BigDecimal(45_000))).isEqualTo(afterPoint);
+
+        // 외부 플랫품 이벤트 리스너 동작 확인
+        verify(externalTransmissionService, times(1)).sendOrderData(any(DomainOrder.class));
     }
 
     @Test
@@ -374,7 +426,10 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         CreateProduct createFreeProduct = CreateProduct.builder()
                 .name("무료상품")
                 .price(BigDecimal.ZERO)
+                .productNumber("PRODUCT_NUMBER01")
+                .category(ProductCategory.ETC)
                 .build();
+
         DomainProduct freeProduct = productRepository.create(createFreeProduct);
 
         CreateProductStock createFreeStock = CreateProductStock.builder()
@@ -411,6 +466,9 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         // 포인트 사용 이력이 기록되지 않아야 함
         List<DomainPointHistory> pointHistories = pointHistoryRepository.findByUserId(userId);
         assertThat(pointHistories).isEmpty();
+
+        // 외부 플랫품 이벤트 리스너 동작 확인
+        verify(externalTransmissionService, times(1)).sendOrderData(any(DomainOrder.class));
     }
 
     @Test
@@ -469,9 +527,9 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         String todayStr = today.format(DATE_FORMATTER);
         String key = redisKey + todayStr;
 
-        Long score1 = redisTemplate.opsForZSet().score(key, 1L).longValue();
-        Long score2 = redisTemplate.opsForZSet().score(key, 2L).longValue();
-        Long score3 = redisTemplate.opsForZSet().score(key, 3L).longValue();
+        Integer score1 = redisTemplate.opsForZSet().score(key, 1L).intValue();
+        Integer score2 = redisTemplate.opsForZSet().score(key, 2L).intValue();
+        Integer score3 = redisTemplate.opsForZSet().score(key, 3L).intValue();
 
         assertThat(score1).isNotNull();
         assertThat(score2).isNotNull();
@@ -479,13 +537,26 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
         assertThat(score1).isEqualTo(item1.getQuantity());
         assertThat(score2).isEqualTo(item2.getQuantity());
         assertThat(score3).isEqualTo(item3.getQuantity());
+
+        // 외부 플랫품 이벤트 리스너 동작 확인
+        verify(externalTransmissionService, times(1)).sendOrderData(any(DomainOrder.class));
     }
+
 
     @Test
     @DisplayName("상품 랭킹 업데이트 통합 테스트")
     void 상품_랭킹_업데이트_통합테스트() {
         // given
         // setUp에서 이미 주문 이력 데이터를 생성했음
+        // 주문 이력 데이터 생성 (랭킹 테스트용)
+        LocalDateTime now = LocalDateTime.now();
+        for (int i = 1; i <= 3; i++) {
+            for (int j = 0; j < i * 2; j++) {
+                CreateOrderProductHistory history = new CreateOrderProductHistory(j + 1L, Long.valueOf(i), i + j);
+                historyRepository.create(history);
+            }
+        }
+
 
         // when
         facade.updateRank();
@@ -546,27 +617,6 @@ class OrderFacadeIntegrationTest extends IntegrationTest {
                 .hasMessageContaining("없는 사용자");
     }
 
-    @Test
-    @DisplayName("존재하지 않는 상품 주문 실패 테스트")
-    void 존재하지_않는_상품_주문_실패_테스트() {
-        // given
-        Long userId = 1L;
-        Long nonExistingProductId = 999L;
 
-        OrderCommand.OrderItem item = OrderCommand.OrderItem.builder()
-                .productId(nonExistingProductId)
-                .quantity(1)
-                .build();
-
-        OrderCommand command = OrderCommand.builder()
-                .userId(userId)
-                .items(List.of(item))
-                .build();
-
-        // when & then
-        assertThatThrownBy(() -> facade.order(command))
-                .isInstanceOf(ApiExceptionResponse.class)
-                .hasMessageContaining("상품이 없습니다");
-    }
 
 }

@@ -87,7 +87,7 @@ class PointFacadeIntegrationTest extends IntegrationTest {
         assertThat(updatedPoint).isEqualTo(chargeAmount);
 
         // DB 검증
-        Optional<DomainPoint> pointInDB = pointRepository.findByUserId(testUser.getId());
+        Optional<DomainPoint> pointInDB = pointRepository.findByUserIdLock(testUser.getId());
         assertThat(pointInDB).isPresent();
         assertThat(pointInDB.get().getPoint()).isEqualTo(chargeAmount);
 
@@ -137,7 +137,7 @@ class PointFacadeIntegrationTest extends IntegrationTest {
         assertThat(finalPoint).isEqualTo(expectedTotal);
 
         // DB 검증
-        Optional<DomainPoint> pointInDB = pointRepository.findByUserId(testUser.getId());
+        Optional<DomainPoint> pointInDB = pointRepository.findByUserIdLock(testUser.getId());
         assertThat(pointInDB).isPresent();
         assertThat(pointInDB.get().getPoint()).isEqualTo(expectedTotal);
 

@@ -37,4 +37,8 @@ public class DomainOrder {
     public void addItem(DomainOrderItem item) {
         this.items.add(item);
     }
+
+    public void addItems(List<DomainOrderItem> items) {
+        this.items.addAll(items);
+    }
 }

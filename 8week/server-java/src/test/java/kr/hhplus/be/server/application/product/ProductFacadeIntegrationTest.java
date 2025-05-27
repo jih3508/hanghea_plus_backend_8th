@@ -63,7 +63,7 @@ class ProductFacadeIntegrationTest extends IntegrationTest {
                 .totalQuantity(100)
                 .build();
 
-        rankRepository.manySave(List.of(rank));
+        rankRepository.saveAll(List.of(rank));
     }
 
     @Test
@@ -113,7 +113,7 @@ class ProductFacadeIntegrationTest extends IntegrationTest {
                 .rank(2)
                 .totalQuantity(80)
                 .build();
-        rankRepository.manySave(List.of(rank2));
+        rankRepository.saveAll(List.of(rank2));
 
         // when
         List<ProductRankCommand> rankList = productFacade.todayProductRank();

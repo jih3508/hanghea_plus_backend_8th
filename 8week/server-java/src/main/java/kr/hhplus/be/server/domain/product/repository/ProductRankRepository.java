@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ProductRankRepository {
 
-    void manySave(List<CreateProductRank> productRank);
+    void saveAll(List<CreateProductRank> productRank);
 
     List<DomainProductRank> todayProductRank();
 

@@ -18,10 +18,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Aspect
@@ -58,7 +56,7 @@ public class DistributedLockAspect {
                 List<String> keys = Arrays.stream(stringKeys.split(","))
                         .map(key ->  stockService.getStock(Long.parseLong(key)))
                         .map(stock -> lockType.getLockName() + stock.getId())
-                        .toList();
+                        .collect(Collectors.toCollection(ArrayList::new));
 
                 return lockService.executeWithLockList(keys, lockable.waitTime(), lockable.leaseTime(), lockable.timeUnit() ,joinPoint::proceed);
             }

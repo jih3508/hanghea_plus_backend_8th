@@ -73,7 +73,7 @@ class ProductRankServiceIntegrationTest extends IntegrationTest {
         CreateProductRank rank3 = new CreateProductRank(3L, 3, 200);
         CreateProductRank rank4 = new CreateProductRank(4L, 4, 100);
         List<CreateProductRank> ranks = List.of(rank1, rank2, rank3, rank4);
-        repository.manySave(ranks);
+        repository.saveAll(ranks);
 
         // when
         List<DomainProductRank> result = service.todayProductRank();

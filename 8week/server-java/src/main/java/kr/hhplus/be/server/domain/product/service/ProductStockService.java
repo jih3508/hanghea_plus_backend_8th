@@ -18,7 +18,7 @@ public class ProductStockService {
 
     public DomainProductStock getStock(Long productId) {
         return repository.findByProductId(productId)
-                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "재고가 정보가 없습니다."));
+                .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "재고 정보가 없습니다."));
     }
 
 

@@ -1,12 +1,14 @@
 package kr.hhplus.be.server.application.order;
 
 import jakarta.transaction.Transactional;
+import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.common.lock.DistributedLock;
 import kr.hhplus.be.server.common.lock.LockStrategy;
 import kr.hhplus.be.server.common.lock.LockType;
 import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
+import kr.hhplus.be.server.domain.order.model.OrderEvent;
 import kr.hhplus.be.server.domain.order.service.OrderService;
 import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
@@ -24,6 +26,7 @@ import kr.hhplus.be.server.infrastructure.order.entity.OrderItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -52,7 +55,7 @@ public class OrderFacade {
 
     private final UserCouponService userCouponService;
 
-    private final ExternalTransmissionService  externalTransmissionService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final ProductRankService productRankService;
 
@@ -63,8 +66,6 @@ public class OrderFacade {
         // 회원 존재하는지 여부 확인
         userService.findById(command.getUserId());
 
-
-        BigDecimal totalPrice = BigDecimal.ZERO;
         CreateOrder createOrder = new CreateOrder(command.getUserId(), createOrderNumber());
 
         Map<Long, Integer> beforeProduct = null;
@@ -87,17 +88,19 @@ public class OrderFacade {
         try{
 
             // 결제 처리
-            if (order.getTotalPrice().compareTo(totalPrice) > 0) {
-                pointService.use(command.getUserId(), totalPrice);
-                pointHistoryService.useHistory(command.getUserId(), totalPrice);
+            if (order.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
+                pointService.use(command.getUserId(), order.getTotalPrice());
+                pointHistoryService.useHistory(command.getUserId(), order.getTotalPrice());
             }
 
             // 외부 데이터 전송
-            externalTransmissionService.sendOrderData();
-        }catch (Exception e) {
+            eventPublisher.publishEvent(OrderEvent.created(order));
+
+        }catch (ApiExceptionResponse e) {
             log.error(e.getMessage(), e);
             // 레디스 랭킹 롤백
-            beforeProduct.forEach((id, quantity) -> productStockService.delivering(id, quantity));
+            beforeProduct.forEach((id, quantity) -> productRankService.resetRank(id, quantity));
+            throw e;
         }
 
     }

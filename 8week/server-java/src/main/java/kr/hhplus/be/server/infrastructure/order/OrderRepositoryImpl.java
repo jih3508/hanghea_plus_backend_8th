@@ -32,6 +32,12 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public List<DomainOrder> findByUserId(Long userId) {
-        return repository.findAllByUserId(userId).stream().map(Order::toDomain).toList();
+        List<DomainOrder> orders = repository.findAllByUserId(userId).stream().map(Order::toDomain).toList();
+        orders.forEach(order -> {
+
+            order.addItems(itemJpaRepository.findByOrderId(order.getId()).stream().map(OrderItem::toDomain).toList());
+        });
+
+        return orders;
     }
 }

@@ -3,7 +3,6 @@ package kr.hhplus.be.server.domain.point.service;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.domain.point.model.DomainPoint;
 import kr.hhplus.be.server.domain.point.model.UpdatePoint;
-import kr.hhplus.be.server.infrastructure.point.entity.Point;
 import kr.hhplus.be.server.domain.point.repository.PointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +23,7 @@ public class PointService {
 
     public DomainPoint getPoint(Long userID) {
 
-        return repository.findByUserId(userID)
+        return repository.findByUserIdLock(userID)
                 .orElseThrow(() -> new ApiExceptionResponse(HttpStatus.NOT_FOUND, "포인트를 찾을 수 없습니다."));
     }
 
