@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.domain.order.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -13,10 +15,19 @@ public class OrderEvent {
     private LocalDateTime eventTime;
     private String eventType;
 
-    public OrderEvent(DomainOrder order, String eventType) {
-        this.eventType = eventType;
+    @JsonCreator
+    public OrderEvent(
+            @JsonProperty("order") DomainOrder order,
+            @JsonProperty("eventType") String eventType,
+            @JsonProperty("eventTime") LocalDateTime eventTime
+    ) {
         this.order = order;
-        this.eventTime = LocalDateTime.now();
+        this.eventType = eventType;
+        this.eventTime = eventTime != null ? eventTime : LocalDateTime.now();
+    }
+
+    public OrderEvent(DomainOrder order, String eventType) {
+        this(order, eventType, LocalDateTime.now());
     }
 
     public static OrderEvent created(DomainOrder order) {
