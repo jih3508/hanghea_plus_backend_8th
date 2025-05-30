@@ -63,4 +63,51 @@ public class WebSocketNotificationService {
             log.error("쿠폰 발급 실패 알림 전송 실패 - userId: {}, requestId: {}", userId, requestId, e);
         }
     }
+    
+    /**
+     * 특정 사용자에게 주문 완료 알림 전송
+     */
+    public void notifyOrderCompleted(Long userId, Long orderId) {
+        try {
+            Map<String, Object> message = Map.of(
+                "type", "ORDER_COMPLETED",
+                "orderId", orderId,
+                "message", "주문이 성공적으로 완료되었습니다."
+            );
+            
+            messagingTemplate.convertAndSendToUser(
+                userId.toString(), 
+                "/queue/order", 
+                message
+            );
+            
+            log.info("주문 완료 알림 전송 완료 - userId: {}, orderId: {}", userId, orderId);
+        } catch (Exception e) {
+            log.error("주문 완료 알림 전송 실패 - userId: {}, orderId: {}", userId, orderId, e);
+        }
+    }
+    
+    /**
+     * 특정 사용자에게 주문 실패 알림 전송
+     */
+    public void notifyOrderFailed(Long userId, Long orderId, String reason) {
+        try {
+            Map<String, Object> message = Map.of(
+                "type", "ORDER_FAILED",
+                "orderId", orderId,
+                "reason", reason,
+                "message", "주문 처리에 실패했습니다: " + reason
+            );
+            
+            messagingTemplate.convertAndSendToUser(
+                userId.toString(), 
+                "/queue/order", 
+                message
+            );
+            
+            log.info("주문 실패 알림 전송 완료 - userId: {}, orderId: {}, reason: {}", userId, orderId, reason);
+        } catch (Exception e) {
+            log.error("주문 실패 알림 전송 실패 - userId: {}, orderId: {}", userId, orderId, e);
+        }
+    }
 }
