@@ -2,10 +2,10 @@ package kr.hhplus.be.server.application.order;
 
 import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
+import kr.hhplus.be.server.common.event.order.ExternalDataTransmissionPublisher;
 import kr.hhplus.be.server.common.lock.DistributedLock;
 import kr.hhplus.be.server.common.lock.LockStrategy;
 import kr.hhplus.be.server.common.lock.LockType;
-import kr.hhplus.be.server.domain.external.ExternalTransmissionService;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
 import kr.hhplus.be.server.domain.order.model.OrderEvent;
@@ -18,11 +18,9 @@ import kr.hhplus.be.server.domain.product.model.DomainProduct;
 import kr.hhplus.be.server.domain.product.service.ProductRankService;
 import kr.hhplus.be.server.domain.product.service.ProductService;
 import kr.hhplus.be.server.domain.product.service.ProductStockService;
-import kr.hhplus.be.server.domain.user.model.DomainUser;
 import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
-import kr.hhplus.be.server.infrastructure.order.entity.OrderItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -59,6 +57,8 @@ public class OrderFacade {
 
     private final ProductRankService productRankService;
 
+    private final ExternalDataTransmissionPublisher orderEventProducer;
+
     @DistributedLock(key = "#command.getProductIdsAsString()", type = LockType.STOCK, strategy = LockStrategy.PUB_SUB_LOCK)
     @Transactional
     public void order(OrderCommand command) {
@@ -94,7 +94,7 @@ public class OrderFacade {
             }
 
             // 외부 데이터 전송
-            eventPublisher.publishEvent(OrderEvent.created(order));
+            orderEventProducer.sendOrderEvent(OrderEvent.created(order));
 
         }catch (ApiExceptionResponse e) {
             log.error(e.getMessage(), e);

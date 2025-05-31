@@ -43,6 +43,13 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 
+	// kafka
+	implementation("org.springframework.kafka:spring-kafka")
+	implementation("org.apache.kafka:kafka-streams")
+	implementation("com.fasterxml.jackson.core:jackson-databind")
+	implementation ("org.apache.kafka:kafka-clients:3.8.0")
+
+
 	//springdoc-openapi Swagger UI 추가
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 	implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.7")
@@ -68,6 +75,10 @@ dependencies{
 	testImplementation("org.testcontainers:mysql")
 	testImplementation("io.rest-assured:rest-assured:5.5.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// Kafka 의존성
+	testImplementation("org.testcontainers:kafka:1.19.0")
+	testImplementation("org.springframework.kafka:spring-kafka-test")
 }
 
 tasks.withType<Test> {
