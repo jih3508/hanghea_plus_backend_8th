@@ -2,11 +2,12 @@ package kr.hhplus.be.server.common.event.coupon;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.hhplus.be.server.common.event.coupon.model.CouponIssueFailed;
+import kr.hhplus.be.server.common.event.coupon.model.CouponIssueRequested;
+import kr.hhplus.be.server.common.event.coupon.model.CouponIssued;
 import kr.hhplus.be.server.common.kafka.TopicType;
-import kr.hhplus.be.server.domain.coupon.service.CouponDomainService;
 import kr.hhplus.be.server.domain.coupon.service.CouponService;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
-import kr.hhplus.be.server.infrastructure.coupon.CouponIssueRedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.StreamsBuilder;

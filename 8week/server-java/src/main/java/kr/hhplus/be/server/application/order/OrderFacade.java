@@ -155,12 +155,12 @@ public class OrderFacade {
      * 주문 생성 이벤트를 Kafka로 발행
      */
     private void publishOrderCreatedEvent(DomainOrder order) {
-        List<OrderCreatedEvent.OrderItem> orderItems = order.getOrderItems().stream()
+        List<OrderCreatedEvent.OrderItem> orderItems = order.getItems().stream()
                 .map(item -> new OrderCreatedEvent.OrderItem(
                         item.getProductId(),
                         item.getProductName(),
                         item.getQuantity(),
-                        item.getPrice()
+                        item.getTotalPrice()
                 ))
                 .toList();
 
