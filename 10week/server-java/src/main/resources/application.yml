@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: hhplus
+  profiles:
+    active: local
+  datasource:
+    name: HangHaePlusDataSource
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximum-pool-size: 3
+      connection-timeout: 10000
+      max-lifetime: 60000
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    generate-ddl: false
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate.timezone.default_storage: NORMALIZE_UTC
+      hibernate.jdbc.time_zone: UTC
+  kafka:
+    bootstrap-servers: localhost:9092
+    properties:
+      request.timeout.ms: 20000
+      retry.backoff.ms: 500
+      auto:
+        create.topics.enable: false
+        register.schemas: false
+        offset.reset: latest
+        # 컨슈머가 붙었을 때, 내가 원하는 곳부터 땡겨온다.
+        # 처음 붙었을 때. ( 다시 붙었을 대. ) 어디부터? 를 결정해야함
+        # latest : 최신 ( 앞의 못읽었던 메세지는 안 읽는다 )
+        # earliest : 카프카에 적재되어있는 제일 오래된 메세지부터 ( 읽었던 메세지를 또 읽을 수도 있음 )
+      use.latest.version: true
+      basic.auth.credentials.source: USER_INFO
+    producer:
+      client-id: 프로듀서 ID 로 쓰일 값
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 5
+    consumer:
+      group-id: 컨슈머 그룹 ID 로 쓰일 값
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      properties:
+        enable-auto-commit: false
+    listener:
+      ack-mode: manual # 수동으로 커밋하겠다.
+      # acknowledge: Acknowledge 라는 객체를 파라미터로 받음 ( 카프카 리스너 함수에서 )
+      # acknowledge.acknowledge() // 요 함수를 호출하면, 그 때 명시적으로 커밋을 날리겠다.
+---
+
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/hhplus?characterEncoding=UTF-8&serverTimezone=UTC
+    username: application
+    password: application
+  data:
+    redis:
+      host: localhost
+      port: 6379

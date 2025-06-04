@@ -1,0 +1,275 @@
+openapi: 3.0.0
+info:
+  title: E-Commerce Order API
+  description: e-커머스 상품 주문 서비스 API 문서
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: 로컬 서버
+tags:
+  - USER
+  - POINT
+  - COUPON
+  - PRODUCT
+  - ORDER
+paths:
+  /point/charge/{userId}:
+    post:
+      summary: 잔액 충전
+      tags:
+        - POINT
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+            example:
+              amount: 10000
+      responses:
+        '200':
+          description: 충전 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: "잘못된 요청 (예: 음수 금액 충전)"
+        '404':
+          description: 사용자 없음
+        '500':
+          description: 서버 오류
+  /point/{userId}:
+    get:
+      summary: 잔액 조회
+      tags:
+        - POINT
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 잔액 정보 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:
+                    type: integer
+              example:
+                amount: 200000
+        '404':
+          description: 사용자 없음
+  /coupons/{userId}:
+    post:
+      summary: 쿠폰 발급
+      tags:
+        - COUPON
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                couponId:
+                  type: integer
+      responses:
+        200:
+          description: 쿠폰 발급 성공
+        400:
+          description: 쿠폰 수량 부족 또는 유효기간 만료
+    get:
+      summary: 보유하는 쿠폰 목록
+      tags:
+        - COUPON
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  couponId:
+                    type: integer
+                    description: 쿠폰 아이디
+                  couponNumber:
+                    type: string
+                    description: 쿠폰번호
+                  type:
+                    type: string
+                    description: 할인 종류(정액, 정률)
+                  rate:
+                    type: integer
+                    description: 할인율
+                  discountPrice:
+                    type: integer
+                    description: 할인 금액
+                  isUsed:
+                    type: boolean
+                    description: 쿠폰 사용 여부
+  /products/{productId}:
+    get:
+      summary: 상품 조회
+      tags:
+        - PRODUCT
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 상품 정보
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: 상품명
+                  productNumber:
+                    type: string
+                    description: 상품번호
+                  price:
+                    type: integer
+                    description: 가격
+                  stock:
+                    type: integer
+                    description: 재고
+              example:
+                name: 맥북
+                productNumber: P-202101010001
+                price: 100000000
+                stock: 100
+  /products/top:
+    get:
+      summary: 인기 상품 조회
+      tags:
+        - PRODUCT
+      responses:
+        200:
+          description: 인기 상품 목록 반환
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    productId:
+                      type: integer
+                      description: 상품 PK
+                    name:
+                      type: string
+                      description: 상품명
+                    rank:
+                      type: integer
+                      description: 순위
+                    salesCount:
+                      type: integer
+                      description: 판매개수
+              example:
+                - productId: 1
+                  name: 맥북
+                  rank: 1
+                  salesCount: 100
+                - productId: 2
+                  name: 겔럭시북
+                  rank: 2
+                  salesCount: 60
+                - productId: 3
+                  name: 아이패드
+                  rank: 3
+                  salesCount: 50
+
+  /order/{userId}:
+    post:
+      summary: 주문 요청
+      tags:
+        - ORDER
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  description: 사용자 pk
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: integer
+                        description: 상품 pk
+                      quantity:
+                        type: integer
+                        description: 수량
+              example:
+                userId: 1
+                items:
+                  - productId: 1
+                    quantity: 5
+                  - productId: 2
+                    quantity: 3
+                  - productId: 3
+                    quantity: 10
+
+      responses:
+        '200':
+          description: 주문 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+        '400':
+          description: 재고 부족 또는 잘못된 요청
+        '402':
+          description: 잔액 부족
+        '500':
+          description: 서버 오류
