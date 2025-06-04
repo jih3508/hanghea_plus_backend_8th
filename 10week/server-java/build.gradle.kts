@@ -48,9 +48,6 @@ dependencies {
 	implementation("org.apache.kafka:kafka-streams")
 	implementation("com.fasterxml.jackson.core:jackson-databind")
 	implementation ("org.apache.kafka:kafka-clients:3.8.0")
-	
-	// websocket
-	implementation("org.springframework.boot:spring-boot-starter-websocket")
 
 
 	//springdoc-openapi Swagger UI 추가
