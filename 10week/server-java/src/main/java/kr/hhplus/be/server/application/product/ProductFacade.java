@@ -11,7 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,11 +45,20 @@ public class ProductFacade {
      * description: 상품 랭크 리스트
      */
     @Cacheable(value = "productRanks", key = "'today'")
-    public List<ProductRankCommand> todayProductRank(){
+    public List<DomainProductRank> todayProductRank(){
 
-        List<DomainProductRank> rank =  rankService.todayProductRank();
-        List<ProductRankCommand> command = rank.stream().map(ProductRankCommand::from).toList();
-        return command;
+        try {
+            List<DomainProductRank> result = rankService.todayProductRank();
+            if (result == null || result.isEmpty()) {
+                log.info("Today product rank is empty");
+                return new ArrayList<>();
+            }
+            log.info("Today product rank loaded: {} items", result.size());
+            return result;
+        } catch (Exception e) {
+            log.error("Failed to load today product rank", e);
+            return new ArrayList<>();  // 장애 시 빈 리스트 반환
+        }
 
     }
 }

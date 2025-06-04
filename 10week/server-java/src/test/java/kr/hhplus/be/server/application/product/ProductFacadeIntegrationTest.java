@@ -116,7 +116,7 @@ class ProductFacadeIntegrationTest extends IntegrationTest {
         rankRepository.saveAll(List.of(rank2));
 
         // when
-        List<ProductRankCommand> rankList = productFacade.todayProductRank();
+        List<DomainProductRank> rankList = productFacade.todayProductRank();
 
         // then
         assertThat(rankList).isNotNull();
