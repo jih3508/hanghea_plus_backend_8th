@@ -6,6 +6,7 @@ import kr.hhplus.be.server.domain.product.repository.ProductRankRepository;
 import kr.hhplus.be.server.infrastructure.product.entity.DecrementRank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class ProductRankService {
         repository.saveAll(productRank);
     }
 
+    @Transactional(readOnly = true)
     public List<DomainProductRank> todayProductRank(){
         return repository.todayProductRank();
     }

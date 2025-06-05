@@ -21,6 +21,18 @@
 ```bash
 docker-compose up -d
 ```
+
+### 애플리케이션 실행
+
+```bash
+# 1. 테스트 데이터 설정 (MySQL + Redis)
+bash load-test/data/setup-database.sh --with-redis
+
+# 2. 애플리케이션 실행
+./gradlew bootRun
+
+# 또는 IDE에서 ServerApplication.java 실행
+```
 ## API 엔드포인트
 
 | 기능 | Method | Endpoint | 설명 |

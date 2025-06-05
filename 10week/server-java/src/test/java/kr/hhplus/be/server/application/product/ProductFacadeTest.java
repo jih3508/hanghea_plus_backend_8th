@@ -151,7 +151,7 @@ class ProductFacadeTest {
         //when
         when(rankService.todayProductRank()).thenReturn(ranks);
 
-        List<ProductRankCommand> commands = facade.todayProductRank();
+        List<DomainProductRank> commands = facade.todayProductRank();
 
         assertThat(commands.size()).isEqualTo(3);
 

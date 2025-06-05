@@ -163,3 +163,19 @@ create table product_rank
         foreign key (product_id) references product (id)
 )
     comment '상품 랭킹 이력';
+
+
+CREATE INDEX idx_user_user_id ON user(user_id);
+CREATE INDEX idx_point_user_id ON point(user_id);
+CREATE INDEX idx_point_history_user_id ON point_history(user_id);
+CREATE INDEX idx_product_category ON product(category);
+CREATE INDEX idx_product_stock_product_id ON product_stock(product_id);
+CREATE INDEX idx_coupon_dates ON coupon(start_date_time, end_date_time);
+CREATE INDEX idx_user_coupon_user_id ON user_coupon(user_id);
+CREATE INDEX idx_user_coupon_coupon_id ON user_coupon(coupon_id);
+CREATE INDEX idx_order_user_id ON `order`(user_id);
+CREATE INDEX idx_order_created_date ON `order`(created_date_time);
+CREATE INDEX idx_order_item_order_id ON order_item(order_id);
+CREATE INDEX idx_order_item_product_id ON order_item(product_id);
+CREATE INDEX idx_product_rank_date ON product_rank(rank_date);
+CREATE INDEX idx_product_rank_product_id ON product_rank(product_id);

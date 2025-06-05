@@ -48,7 +48,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             log.warn("IP {} 에 대한 요청 속도 제한 초과", clientIpAddress);
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.getWriter().write("요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.");
-            return;
+            //return;
         }
 
         // 요청 처리

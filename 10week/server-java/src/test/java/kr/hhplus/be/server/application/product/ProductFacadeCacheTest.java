@@ -48,7 +48,7 @@ class ProductFacadeCacheTest{
         // when: 동일한 메서드를 여러 번 호출
         productFacade.todayProductRank(); // 첫 번째 호출 - 캐시 저장
         productFacade.todayProductRank(); // 두 번째 호출 - 캐시에서 조회
-        List<ProductRankCommand> result = productFacade.todayProductRank(); // 세 번째 호출 - 캐시에서 조회
+        List<DomainProductRank> result = productFacade.todayProductRank(); // 세 번째 호출 - 캐시에서 조회
 
         log.info(result.toString());
 

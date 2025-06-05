@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.application.product.ProductRankCommand;
 import kr.hhplus.be.server.application.product.ProductFacade;
 import kr.hhplus.be.server.application.product.ProductInfoCommand;
+import kr.hhplus.be.server.domain.product.model.DomainProductRank;
 import kr.hhplus.be.server.interfaces.api.common.ApiResponse;
 import kr.hhplus.be.server.interfaces.api.product.response.ProductInfoResponse;
 import kr.hhplus.be.server.interfaces.api.product.response.ProductTopResponse;
@@ -36,8 +37,9 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/top")
     public ApiResponse<List<ProductTopResponse>> topProducts(){
-        List<ProductRankCommand> commands = facade.todayProductRank();
-        List<ProductTopResponse> responses = commands.stream().map(ProductTopResponse::of).collect(Collectors.toList());
+        List<DomainProductRank> result = facade.todayProductRank();
+        List<ProductRankCommand> command = result.stream().map(ProductRankCommand::from).collect(Collectors.toList());
+        List<ProductTopResponse> responses = command.stream().map(ProductTopResponse::of).collect(Collectors.toList());
         return ApiResponse.ok(responses);
 
     }
