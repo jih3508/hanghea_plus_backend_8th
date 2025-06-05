@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>쿠폰 발급 & 주문 처리 WebSocket 테스트</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .button:hover { background: #0056b3; }
+        .log { background: #f8f9fa; padding: 10px; border-radius: 3px; height: 200px; overflow-y: scroll; margin-top: 10px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>쿠폰 발급 & 주문 처리 WebSocket 테스트</h1>
+        
+        <!-- WebSocket 연결 -->
+        <div class="section">
+            <h3>WebSocket 연결</h3>
+            <input type="number" id="userId" placeholder="사용자 ID" value="1">
+            <button class="button" onclick="connect()">연결</button>
+            <button class="button" onclick="disconnect()">연결 해제</button>
+            <p>연결 상태: <span id="connectionStatus">연결 안됨</span></p>
+        </div>
+
+        <!-- 쿠폰 발급 테스트 -->
+        <div class="section">
+            <h3>쿠폰 발급 테스트</h3>
+            <input type="number" id="couponId" placeholder="쿠폰 ID" value="1">
+            <button class="button" onclick="issueCoupon()">쿠폰 발급 요청</button>
+        </div>
+
+        <!-- 주문 테스트 -->
+        <div class="section">
+            <h3>주문 테스트</h3>
+            <input type="number" id="productId" placeholder="상품 ID" value="1">
+            <input type="number" id="quantity" placeholder="수량" value="1">
+            <input type="number" id="orderCouponId" placeholder="쿠폰 ID (선택)" value="">
+            <input type="number" id="pointAmount" placeholder="포인트 사용 금액 (선택)" value="">
+            <button class="button" onclick="createOrder()">주문 요청</button>
+        </div>
+
+        <!-- 로그 -->
+        <div class="section">
+            <h3>실시간 알림 로그</h3>
+            <button class="button" onclick="clearLog()">로그 지우기</button>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        let currentUserId = null;
+
+        function connect() {
+            const userId = document.getElementById('userId').value;
+            if (!userId) {
+                alert('사용자 ID를 입력하세요');
+                return;
+            }
+
+            currentUserId = userId;
+            const socket = new SockJS('/ws/coupon');
+            stompClient = Stomp.over(socket);
+            
+            stompClient.connect({}, function (frame) {
+                updateConnectionStatus('연결됨', 'success');
+                addLog('WebSocket 연결 성공', 'success');
+                
+                // 쿠폰 알림 구독
+                stompClient.subscribe('/user/queue/coupon', function (message) {
+                    const notification = JSON.parse(message.body);
+                    handleCouponNotification(notification);
+                });
+
+                // 주문 알림 구독
+                stompClient.subscribe('/user/queue/order', function (message) {
+                    const notification = JSON.parse(message.body);
+                    handleOrderNotification(notification);
+                });
+
+            }, function(error) {
+                updateConnectionStatus('연결 실패', 'error');
+                addLog('WebSocket 연결 실패: ' + error, 'error');
+            });
+        }
+
+        function disconnect() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+                updateConnectionStatus('연결 해제됨', 'info');
+                addLog('WebSocket 연결 해제', 'info');
+            }
+        }
+
+        function updateConnectionStatus(status, className) {
+            const statusElement = document.getElementById('connectionStatus');
+            statusElement.textContent = status;
+            statusElement.className = className;
+        }
+
+        function issueCoupon() {
+            const userId = document.getElementById('userId').value;
+            const couponId = document.getElementById('couponId').value;
+            
+            if (!userId || !couponId) {
+                alert('사용자 ID와 쿠폰 ID를 입력하세요');
+                return;
+            }
+
+            fetch(`/api/coupons/issue/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    couponId: parseInt(couponId)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addLog(`쿠폰 발급 요청 완료: ${data.message} (RequestId: ${data.data})`, 'info');
+            })
+            .catch(error => {
+                addLog(`쿠폰 발급 요청 실패: ${error}`, 'error');
+            });
+        }
+
+        function createOrder() {
+            const userId = document.getElementById('userId').value;
+            const productId = document.getElementById('productId').value;
+            const quantity = document.getElementById('quantity').value;
+            const couponId = document.getElementById('orderCouponId').value;
+            const pointAmount = document.getElementById('pointAmount').value;
+            
+            if (!userId || !productId || !quantity) {
+                alert('사용자 ID, 상품 ID, 수량을 입력하세요');
+                return;
+            }
+
+            const orderData = {
+                items: [{
+                    productId: parseInt(productId),
+                    quantity: parseInt(quantity),
+                    couponId: couponId ? parseInt(couponId) : null
+                }]
+            };
+
+            if (pointAmount) {
+                orderData.pointAmount = parseFloat(pointAmount);
+            }
+
+            fetch(`/api/orders/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                addLog(`주문 요청 완료: ${data.message} (RequestId: ${data.data})`, 'info');
+            })
+            .catch(error => {
+                addLog(`주문 요청 실패: ${error}`, 'error');
+            });
+        }
+
+        function handleCouponNotification(notification) {
+            const timestamp = new Date().toLocaleTimeString();
+            let message = '';
+            let className = '';
+
+            switch (notification.type) {
+                case 'COUPON_ISSUE_SUCCESS':
+                    message = `[${timestamp}] 쿠폰 발급 성공! (UserCouponId: ${notification.userCouponId})`;
+                    className = 'success';
+                    break;
+                case 'COUPON_ISSUE_FAILED':
+                    message = `[${timestamp}] 쿠폰 발급 실패: ${notification.reason}`;
+                    className = 'error';
+                    break;
+                default:
+                    message = `[${timestamp}] 알 수 없는 쿠폰 알림: ${JSON.stringify(notification)}`;
+                    className = 'info';
+            }
+
+            addLog(message, className);
+        }
+
+        function handleOrderNotification(notification) {
+            const timestamp = new Date().toLocaleTimeString();
+            let message = '';
+            let className = '';
+
+            switch (notification.type) {
+                case 'ORDER_COMPLETED':
+                    message = `[${timestamp}] 주문 완료! (OrderId: ${notification.orderId})`;
+                    className = 'success';
+                    break;
+                case 'ORDER_FAILED':
+                    message = `[${timestamp}] 주문 실패: ${notification.reason} (OrderId: ${notification.orderId})`;
+                    className = 'error';
+                    break;
+                default:
+                    message = `[${timestamp}] 알 수 없는 주문 알림: ${JSON.stringify(notification)}`;
+                    className = 'info';
+            }
+
+            addLog(message, className);
+        }
+
+        function addLog(message, className) {
+            const logElement = document.getElementById('log');
+            const logEntry = document.createElement('div');
+            logEntry.className = className;
+            logEntry.textContent = message;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // 페이지 언로드시 연결 해제
+        window.addEventListener('beforeunload', function() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+            }
+        });
+    </script>
+</body>
+</html>

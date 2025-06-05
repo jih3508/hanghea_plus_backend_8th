@@ -33,7 +33,7 @@ public class CouponController {
                                           @RequestBody CouponIssueRequest request) {
 
         CouponIssueCommand command = CouponIssueCommand.of(userId, request.getCouponId());
-        facade.issue(command);
-        return ApiResponse.ok();
+        String requestId = facade.issueAsync(command);
+        return ApiResponse.of("쿠폰 발급 요청이 접수되었습니다. 결과는 실시간으로 알림됩니다.", requestId);
     }
 }
