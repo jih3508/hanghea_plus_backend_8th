@@ -10,7 +10,7 @@ export let options = {
 };
 
 export default function() {
-    const userId = Math.floor(Math.random() * 1000) + 1;
+    const userId = Math.floor(Math.random() * 10) + 1;
 
     let res = http.get(`${BASE_URL}/api/users/${userId}/coupons`);
 

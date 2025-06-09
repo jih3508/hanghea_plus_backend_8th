@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.domain.product.model;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import kr.hhplus.be.server.infrastructure.product.entity.Product;
 import kr.hhplus.be.server.infrastructure.product.entity.ProductCategory;
 import lombok.*;
@@ -10,6 +13,7 @@ import java.math.BigDecimal;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class DomainProductRank {
 
@@ -19,6 +23,7 @@ public class DomainProductRank {
 
     private String productName;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal price;
 
     private ProductCategory category;

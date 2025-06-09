@@ -36,12 +36,29 @@ services:
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@127.0.0.1:9093
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
 
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
 volumes:
   mysql-5-7-data:
   redis_data:
   redis_config:
   kafka-zookeeper-data:
   kafka-data:
+  grafana-storage:
 
 networks:
   default:
