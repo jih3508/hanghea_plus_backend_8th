@@ -3,12 +3,14 @@ package kr.hhplus.be.server.application.order;
 import jakarta.transaction.Transactional;
 import kr.hhplus.be.server.common.dto.ApiExceptionResponse;
 import kr.hhplus.be.server.common.event.order.ExternalDataTransmissionPublisher;
+import kr.hhplus.be.server.common.event.product.StockDeductionRequested;
 import kr.hhplus.be.server.common.lock.DistributedLock;
 import kr.hhplus.be.server.common.lock.LockStrategy;
 import kr.hhplus.be.server.common.lock.LockType;
 import kr.hhplus.be.server.domain.order.model.CreateOrder;
 import kr.hhplus.be.server.domain.order.model.DomainOrder;
 import kr.hhplus.be.server.domain.order.model.OrderEvent;
+import kr.hhplus.be.server.domain.order.model.OrderStatus;
 import kr.hhplus.be.server.domain.order.service.OrderService;
 import kr.hhplus.be.server.domain.order.vo.OrderHistoryProductGroupVo;
 import kr.hhplus.be.server.domain.point.service.PointHistoryService;
@@ -21,6 +23,7 @@ import kr.hhplus.be.server.domain.product.service.ProductStockService;
 import kr.hhplus.be.server.domain.user.model.DomainUserCoupon;
 import kr.hhplus.be.server.domain.user.service.UserCouponService;
 import kr.hhplus.be.server.domain.user.service.UserService;
+import kr.hhplus.be.server.infrastructure.order.OrderKafkaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -33,6 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,42 +44,36 @@ import java.util.Map;
 public class OrderFacade {
 
     private final OrderService service;
-
     private final UserService userService;
-
-    private final PointService  pointService;
-
+    private final PointService pointService;
     private final PointHistoryService pointHistoryService;
-
     private final ProductService productService;
-
     private final ProductStockService productStockService;
-
     private final UserCouponService userCouponService;
-
     private final ApplicationEventPublisher eventPublisher;
-
     private final ProductRankService productRankService;
-
     private final ExternalDataTransmissionPublisher orderEventProducer;
+    private final OrderKafkaRepository orderSagaOrchestrator;
 
+    /**
+     * 기존 동기 주문 처리 (레거시)
+     */
     @DistributedLock(key = "#command.getProductIdsAsString()", type = LockType.STOCK, strategy = LockStrategy.PUB_SUB_LOCK)
     @Transactional
     public void order(OrderCommand command) {
-
+        // 기존 로직 유지 (레거시 지원)
+        // 실제 운영에서는 이 메서드를 deprecated 처리할 수 있음
+        
         // 회원 존재하는지 여부 확인
         userService.findById(command.getUserId());
 
         CreateOrder createOrder = new CreateOrder(command.getUserId(), createOrderNumber());
 
-        Map<Long, Integer> beforeProduct = null;
-        beforeProduct = new HashMap<>();
+        Map<Long, Integer> beforeProduct = new HashMap<>();
 
         for (OrderCommand.OrderItem item : command.getItems()) {
-
             DomainProduct product = productService.getProduct(item.getProductId());
             productStockService.delivering(product.getId(), item.getQuantity());
-
 
             DomainUserCoupon userCoupon = null;
             if (item.getCouponId() != null) {
@@ -86,7 +84,6 @@ public class OrderFacade {
         }
         DomainOrder order = service.create(createOrder);
         try{
-
             // 결제 처리
             if (order.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
                 pointService.use(command.getUserId(), order.getTotalPrice());
@@ -102,7 +99,76 @@ public class OrderFacade {
             beforeProduct.forEach((id, quantity) -> productRankService.resetRank(id, quantity));
             throw e;
         }
+    }
 
+    /**
+     * 사가 패턴 기반 비동기 주문 처리
+     */
+    @Transactional
+    public String orderAsync(OrderCommand command) {
+        try {
+            log.info("비동기 주문 처리 시작 - userId: {}, items: {}", command.getUserId(), command.getItems().size());
+            
+            // 회원 존재하는지 여부 확인
+            userService.findById(command.getUserId());
+
+            // 주문 번호 생성
+            String orderNumber = createOrderNumber();
+            String requestId = UUID.randomUUID().toString();
+
+            // 주문 임시 생성 (PENDING 상태)
+            CreateOrder createOrder = new CreateOrder(command.getUserId(), orderNumber);
+            createOrder.setStatus(OrderStatus.PENDING); // PENDING 상태로 생성
+
+            // 주문 아이템 구성 및 검증
+            BigDecimal totalPointAmount = BigDecimal.ZERO;
+            Long userCouponId = null;
+            
+            List<StockDeductionRequested.OrderItem> orderItems = new LinkedList<>();
+            
+            for (OrderCommand.OrderItem item : command.getItems()) {
+                // 상품 존재 여부 확인
+                DomainProduct product = productService.getProduct(item.getProductId());
+                
+                // 쿠폰 검증
+                DomainUserCoupon userCoupon = null;
+                if (item.getCouponId() != null) {
+                    userCoupon = userCouponService.findValidCoupon(command.getUserId(), item.getCouponId());
+                    userCouponId = userCoupon.getId();
+                }
+                
+                createOrder.addOrderItem(product, userCoupon, item.getQuantity());
+                
+                // 재고 차감용 아이템 생성
+                orderItems.add(new StockDeductionRequested.OrderItem(item.getProductId(), item.getQuantity()));
+            }
+
+            // 주문 생성
+            DomainOrder order = service.create(createOrder);
+            
+            // 포인트 사용 금액 계산
+            if (order.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
+                totalPointAmount = order.getTotalPrice();
+            }
+
+            // 사가 오케스트레이터를 통해 병렬 처리 시작
+            orderSagaOrchestrator.startOrderSaga(
+                order.getId(),
+                command.getUserId(),
+                orderItems,
+                userCouponId,
+                totalPointAmount
+            );
+
+            log.info("비동기 주문 처리 접수 완료 - orderId: {}, userId: {}, requestId: {}", 
+                    order.getId(), command.getUserId(), requestId);
+            
+            return requestId;
+            
+        } catch (Exception e) {
+            log.error("비동기 주문 처리 중 오류 발생 - userId: {}", command.getUserId(), e);
+            throw e;
+        }
     }
 
 

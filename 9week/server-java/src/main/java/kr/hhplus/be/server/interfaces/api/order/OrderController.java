@@ -21,13 +21,13 @@ public class OrderController {
 
     @Operation(summary = "주문 결제 API")
     @PostMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.ACCEPTED)
     public ApiResponse<String> order(@PathVariable("userId") Long userId,
                                @Valid @RequestBody OrderRequest request){
 
         OrderCommand command = OrderCommand.toCommand(userId, request);
-        facade.order(command);
-        return ApiResponse.ok();
+        String requestId = facade.orderAsync(command);
+        return ApiResponse.of("주문이 접수되었습니다. 결과는 실시간으로 알림됩니다.", requestId);
     }
 
 }
